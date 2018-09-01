@@ -22,16 +22,16 @@ x
 ```
 
     ##    id group       score
-    ## 1   1     C -0.05778232
-    ## 2   2     C -1.32685720
-    ## 3   3     B -2.63400318
-    ## 4   4     B -0.10922199
-    ## 5   5     A  1.02945226
-    ## 6   6     B -0.64868047
-    ## 7   7     A -0.27382033
-    ## 8   8     B -0.83312115
-    ## 9   9     C -0.07377452
-    ## 10 10     B  0.34918864
+    ## 1   1     B  1.60414577
+    ## 2   2     C -0.83918716
+    ## 3   3     C  0.31038429
+    ## 4   4     A  0.07604252
+    ## 5   5     C  0.04191296
+    ## 6   6     B  0.31868635
+    ## 7   7     B -0.63608558
+    ## 8   8     A  1.15697537
+    ## 9   9     C  0.57185297
+    ## 10 10     B -0.66665510
 
 Now, lets imaging we would like to sort, subset or aggregate it, we would do stuff like:
 
@@ -41,16 +41,16 @@ x[order(x$score),]
 ```
 
     ##    id group       score
-    ## 3   3     B -2.63400318
-    ## 2   2     C -1.32685720
-    ## 8   8     B -0.83312115
-    ## 6   6     B -0.64868047
-    ## 7   7     A -0.27382033
-    ## 4   4     B -0.10922199
-    ## 9   9     C -0.07377452
-    ## 1   1     C -0.05778232
-    ## 10 10     B  0.34918864
-    ## 5   5     A  1.02945226
+    ## 2   2     C -0.83918716
+    ## 10 10     B -0.66665510
+    ## 7   7     B -0.63608558
+    ## 5   5     C  0.04191296
+    ## 4   4     A  0.07604252
+    ## 3   3     C  0.31038429
+    ## 6   6     B  0.31868635
+    ## 9   9     C  0.57185297
+    ## 8   8     A  1.15697537
+    ## 1   1     B  1.60414577
 
 or
 
@@ -59,9 +59,14 @@ or
 x[x$score >= 0,]
 ```
 
-    ##    id group     score
-    ## 5   5     A 1.0294523
-    ## 10 10     B 0.3491886
+    ##   id group      score
+    ## 1  1     B 1.60414577
+    ## 3  3     C 0.31038429
+    ## 4  4     A 0.07604252
+    ## 5  5     C 0.04191296
+    ## 6  6     B 0.31868635
+    ## 8  8     A 1.15697537
+    ## 9  9     C 0.57185297
 
 or
 
@@ -85,12 +90,6 @@ dplyr is designed to abstract over how the data is stored. That means as well as
 
 First, let's install (if necessary) and load it:
 
-``` r
-# # The easiest way to get dplyr is to install the whole tidyverse, including GGplot2 and all the stuff we will need later anyhow:
-# install.packages("tidyverse")
-library(dplyr)
-```
-
     ## Warning: package 'dplyr' was built under R version 3.5.1
 
     ## 
@@ -103,10 +102,6 @@ library(dplyr)
     ## The following objects are masked from 'package:base':
     ## 
     ##     intersect, setdiff, setequal, union
-
-``` r
-library(magrittr) # For some advanced piping operations not included in dplyr
-```
 
 ### Piping in `dplyr`
 
@@ -173,6 +168,8 @@ starwars
 #### 1: `filter()`
 
 The verb `filter()` lets you subset a dataframe by rows (observations), meaning the output will filter for only rows which fulfill a certain condition.
+
+![Filter](media/m1_dplyr_filter.png)
 
 ``` r
 starwars %>% 
@@ -278,6 +275,8 @@ starwars %>%
 
 The verb `arrange()` defines the way the rows of your dataframe are ordered
 
+![Arrange](media/m1_dplyr_arrange.png)
+
 ``` r
 starwars %>% 
   arrange(homeworld, desc(mass))
@@ -302,6 +301,8 @@ starwars %>%
 #### 4: `mutate()`
 
 The verb `mutate()` lets you manipulate existing variables or create new ones.
+
+![Mutate](media/m1_dplyr_mutate.png)
 
 ``` r
 starwars %>% 
@@ -330,6 +331,8 @@ starwars %>%
 
 The verb `summarize()` reduces your dataset to one observation, which is summarized according to a defined function.
 
+![Summarize](media/m1_dplyr_summarize.png)
+
 ``` r
 starwars %>% 
   summarize(min.height = min(height, na.rm = TRUE),
@@ -346,6 +349,8 @@ starwars %>%
 #### Doing manipulation by group: `group_by`
 
 Finally, `by_group()` is offers the perfect complement to the 5 basic verbs, since it allows to perform aqll the above mentioned tasks sepperate according to used-defined groupings in one or multiple categories. Lets look at some examples:
+
+![Group](media/m1_dplyr_group.png)
 
 First of all, it works amazingly well with the `summarize()` verb, producing within group summaries
 
@@ -590,7 +595,17 @@ votes
     ## 10    46       2     9    54
     ## # ... with 508,919 more rows
 
-We see that the dataset is with 508,929 observations already somewhat large. We find a set of 4 variables. Doesn't sound so exiting on first glance. Anyhow, lets talk for a moment about the variables we have: \* **`rcid:`** The roll-call ID, serving as an unique identifyer for the resolution vouted on. \* **`session:`** The number of the session of the annual UNGA, starting with 1 for the historically first meeting \* **`vote:`** A numerical code representing the country's choice of vote: \* 1 = Yes \* 2 = Abstain \* 3 = No \* 8 = Not present \* 9 = Not a member \* **`ccode:`** A numerical code to identify the country
+We see that the dataset is with 508,929 observations already somewhat large. We find a set of 4 variables. Doesn't sound so exiting on first glance. Anyhow, lets talk for a moment about the variables we have:
+
+-   **`rcid:`** The roll-call ID, serving as an unique identifyer for the resolution vouted on.
+-   **`session:`** The number of the session of the annual UNGA, starting with 1 for the historically first meeting
+-   **`vote:`** A numerical code representing the country's choice of vote:
+    -   1 = Yes
+    -   2 = Abstain
+    -   3 = No
+    -   8 = Not present
+    -   9 = Not a member
+-   **`ccode:`** A numerical code to identify the country
 
 So, to sum up: \* Every row contains a voting choice for a particular resolution on country level. \* Consequently, we will for every resulution have a single row for every country. \* All variables are coded numerically
 

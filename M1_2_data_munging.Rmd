@@ -58,7 +58,7 @@ So, let's zoom in the `dplyr` functionality and syntax for a moment, before we i
 dplyr is designed to abstract over how the data is stored. That means as well as working with local data frames, you can also work with remote database tables, using exactly the same R code. Install the `dbplyr` package then read `vignette("databases", package = "dbplyr")`.
 
 First, let's install (if necessary) and load it:
-```{r}
+```{r, echo = FALSE}
 # # The easiest way to get dplyr is to install the whole tidyverse, including GGplot2 and all the stuff we will need later anyhow:
 # install.packages("tidyverse")
 library(dplyr)
@@ -118,6 +118,8 @@ starwars
 #### 1: `filter()`
 The verb `filter()` lets you subset a dataframe by rows (observations), meaning the output will filter for only rows which fulfill a certain condition.
 
+![Filter](media/m1_dplyr_filter.png)
+
 ```{r}
 starwars %>% 
   filter(species == "Droid")
@@ -155,6 +157,8 @@ starwars %>%
 #### 3: `arrange()`
 The verb `arrange()` defines the way the rows of your dataframe are ordered
 
+![Arrange](media/m1_dplyr_arrange.png)
+
 ```{r}
 starwars %>% 
   arrange(homeworld, desc(mass))
@@ -162,6 +166,8 @@ starwars %>%
 
 #### 4: `mutate()`
 The verb `mutate()` lets you manipulate existing variables or create new ones.
+
+![Mutate](media/m1_dplyr_mutate.png)
 
 ```{r}
 starwars %>% 
@@ -175,6 +181,8 @@ starwars %>%
 #### 5: `summarize()`
 The verb `summarize()` reduces your dataset to one observation, which is summarized according to a defined function.
 
+![Summarize](media/m1_dplyr_summarize.png)
+
 ```{r}
 starwars %>% 
   summarize(min.height = min(height, na.rm = TRUE),
@@ -186,6 +194,8 @@ starwars %>%
 
 #### Doing manipulation by group: `group_by`
 Finally, `by_group()` is offers the perfect complement to the 5 basic verbs, since it allows to perform aqll the above mentioned tasks sepperate according to used-defined groupings in one or multiple categories. Lets look at some examples:
+
+![Group](media/m1_dplyr_group.png)
 
 First of all, it works amazingly well with the `summarize()` verb, producing within group summaries
 ```{r}
@@ -298,6 +308,7 @@ votes
 ```
 
 We see that the dataset is with 508,929 observations already somewhat large. We find a set of 4 variables. Doesn't sound so exiting on first glance. Anyhow, lets talk for a moment about the variables we have:
+
 * **`rcid:`** The roll-call ID, serving as an unique identifyer for the resolution vouted on.
 * **`session:`** The number of the session of the annual UNGA, starting with 1 for the historically first meeting
 * **`vote:`** A numerical code representing the country's choice of vote:

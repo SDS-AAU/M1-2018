@@ -22,16 +22,16 @@ x
 ```
 
     ##    id group       score
-    ## 1   1     B  1.60414577
-    ## 2   2     C -0.83918716
-    ## 3   3     C  0.31038429
-    ## 4   4     A  0.07604252
-    ## 5   5     C  0.04191296
-    ## 6   6     B  0.31868635
-    ## 7   7     B -0.63608558
-    ## 8   8     A  1.15697537
-    ## 9   9     C  0.57185297
-    ## 10 10     B -0.66665510
+    ## 1   1     A  0.89757977
+    ## 2   2     C -0.43508129
+    ## 3   3     B  0.19020396
+    ## 4   4     A  0.97967879
+    ## 5   5     A -2.05315824
+    ## 6   6     A -0.25699690
+    ## 7   7     B  1.54838109
+    ## 8   8     B  1.79553677
+    ## 9   9     A  2.73763571
+    ## 10 10     A  0.09400239
 
 Now, lets imaging we would like to sort, subset or aggregate it, we would do stuff like:
 
@@ -41,16 +41,16 @@ x[order(x$score),]
 ```
 
     ##    id group       score
-    ## 2   2     C -0.83918716
-    ## 10 10     B -0.66665510
-    ## 7   7     B -0.63608558
-    ## 5   5     C  0.04191296
-    ## 4   4     A  0.07604252
-    ## 3   3     C  0.31038429
-    ## 6   6     B  0.31868635
-    ## 9   9     C  0.57185297
-    ## 8   8     A  1.15697537
-    ## 1   1     B  1.60414577
+    ## 5   5     A -2.05315824
+    ## 2   2     C -0.43508129
+    ## 6   6     A -0.25699690
+    ## 10 10     A  0.09400239
+    ## 3   3     B  0.19020396
+    ## 1   1     A  0.89757977
+    ## 4   4     A  0.97967879
+    ## 7   7     B  1.54838109
+    ## 8   8     B  1.79553677
+    ## 9   9     A  2.73763571
 
 or
 
@@ -59,14 +59,14 @@ or
 x[x$score >= 0,]
 ```
 
-    ##   id group      score
-    ## 1  1     B 1.60414577
-    ## 3  3     C 0.31038429
-    ## 4  4     A 0.07604252
-    ## 5  5     C 0.04191296
-    ## 6  6     B 0.31868635
-    ## 8  8     A 1.15697537
-    ## 9  9     C 0.57185297
+    ##    id group      score
+    ## 1   1     A 0.89757977
+    ## 3   3     B 0.19020396
+    ## 4   4     A 0.97967879
+    ## 7   7     B 1.54838109
+    ## 8   8     B 1.79553677
+    ## 9   9     A 2.73763571
+    ## 10 10     A 0.09400239
 
 or
 
@@ -752,10 +752,12 @@ Ok, we see that in general, countries tend to be "aggreable". While nice to know
 The `summarize()` function is especially useful when used within groups. Here, it gives not a overal summary, but one for every group instance. For example, we might like to know how much the average "agreeableness" of countries changed from year to year. To examine this, you can use `group_by()` to perform your summary not for the entire dataset, but within each year.
 
 ``` r
-votes %>%
+year <- votes %>%
+  arrange(year) %>%
   group_by(year) %>%
   summarize(total = n(),
             percent_yes = mean(vote == 1)) 
+year
 ```
 
     ## # A tibble: 34 x 3
@@ -773,7 +775,78 @@ votes %>%
     ## 10  1965  4382       0.708
     ## # ... with 24 more rows
 
-Note: We don't need to use the `ungroup()` here afterwards, since we do not assign values but only create an output. Anyhow, it looks like the overall "agreeableness" seems to increase over time. We could also plot that (don't get confused with `ggplot2` code, we will catch up on that later)
+On first galance, it looks like the overall "agreeableness" seems to increase over time.
+
+### Summarizing by country
+
+In the last exercise, you performed a summary of the votes within each year. You could instead summarize() within each country, which would let you compare voting patterns between countries. For further analysis, we wil create a new dataframe on country level.
+
+``` r
+country <- votes %>%
+  group_by(country) %>%
+  summarize(total = n(),
+            percent_yes = mean(vote == 1))
+```
+
+Let's inspect this country level voting pattern by looking at the most and least agreable countries by arranging the dataframe.
+
+``` r
+country %>%
+  arrange(desc(percent_yes)) %>%
+  slice(1:10)
+```
+
+    ## # A tibble: 10 x 3
+    ##    country              total percent_yes
+    ##    <chr>                <int>       <dbl>
+    ##  1 São Tomé & Príncipe   1091       0.976
+    ##  2 Seychelles             881       0.975
+    ##  3 Djibouti              1598       0.961
+    ##  4 Guinea-Bissau         1538       0.960
+    ##  5 Timor-Leste            326       0.957
+    ##  6 Mauritius             1831       0.950
+    ##  7 Zimbabwe              1361       0.949
+    ##  8 Comoros               1133       0.947
+    ##  9 United Arab Emirates  1934       0.947
+    ## 10 Mozambique            1701       0.947
+
+``` r
+country %>%
+  arrange(percent_yes) %>%
+  slice(1:10)
+```
+
+    ## # A tibble: 10 x 3
+    ##    country                          total percent_yes
+    ##    <chr>                            <int>       <dbl>
+    ##  1 Zanzibar                             2       0    
+    ##  2 United States                     2568       0.269
+    ##  3 Palau                              369       0.339
+    ##  4 Israel                            2380       0.341
+    ##  5 United Kingdom                    2558       0.417
+    ##  6 France                            2527       0.427
+    ##  7 Micronesia (Federated States of)   724       0.442
+    ##  8 Marshall Islands                   757       0.491
+    ##  9 Belgium                           2568       0.492
+    ## 10 Canada                            2576       0.508
+
+Here we have the top-10 agreable and non-agreable countries (note the use of `slice()`, one of the many advanced `dplyr` verbs). We see that Zanzibar is an absolutely non-agreeing country. Yet, we also see that they only participated in 2 votes. So, is that number reliable and informative? That is a classical example of how we might get misleading results when working with aggregated data without thorroughly investigating it upfront.
+
+So, in conclusion: We might want to get rid of countries with very litte total votes.
+
+``` r
+country %<>%
+  filter(total >= 100)
+```
+
+First (petite) graphical exploration
+------------------------------------
+
+Allright, lets go on with a little analysis of time trends. Here, we will do a bit more graphical exploration. Therefore, lets have a mini-introduction to graphical plotting. Since this will be
+
+### Digression: The Grammar of graphics, and [`ggplot2`](https://ggplot2.tidyverse.org/)
+
+ggplot2 can be thought of as a mini-language (domain-specific language) within the R language. It is an R implementation of [Wilkinson's Grammar of Graphics book](https://www.springer.com/gp/book/9780387245447). [A Layered Grammar of Graphics](http://vita.had.co.nz/papers/layered-grammar.pdf) describes Hadley's implementation of these thoughts in the ggplot2's design. Conceptually, the main idea behind the Grammar of Graphics is that a statistical graphic is a mapping from variables to aesthetic attributes (x axis value, y axis value, color, shape, size) of geometric objects (points, line, bars). While the Grammar of Graphic contains more elements, we will focus in this brief intro in the two main ones, aestetics and geometries. \* **Aestetics:** Devine the "surface" of your plot, in terms of what has to be mapped (size, coplor) on the x and y (and potentially adittional) axes. Aesteticts are defined within the `aes()` function. \* **Geometries:** Visual elements you can see in the plot itself, such as bars, lines, and points. They are defined within various `geom_XYZ()` functions. Basically, you define a surface grid and then plot something on top. We will talk about all of that in depth in later sessions, for now that's all you need to know to understand the following simple examples.
 
 ``` r
 library(ggplot2)
@@ -781,39 +854,287 @@ library(ggplot2)
 
     ## Warning: package 'ggplot2' was built under R version 3.5.1
 
+### Plotting by year
+
+So, lets graphically explore the development of agreeability over time. The code below is very simple. We pass our data `year` to the `ggplot()` function, which here only contains the basic aestetics `aes()`. In this case, we would like to map the `year` on the `x`, and the value of the `percent_yes` variable on the `y` axis. That defines the plot's surface. Then, we use the `+` to add a geometric element, in this case a line-plot.
+
 ``` r
-votes %>% 
-  arrange(year) %>% group_by(year) %>% summarize(total = n(), percent_yes = mean(vote == 1)) %>%
+year %>%
   ggplot(aes(x = year, y = percent_yes) ) +
-  geom_line(size = 1) 
+  geom_line() 
 ```
 
-![](M1_2_data_munging_files/figure-markdown_github/unnamed-chunk-34-1.png)
+![](M1_2_data_munging_files/figure-markdown_github/unnamed-chunk-38-1.png)
 
-Well, apparently that was true till the 80s, and then somewhat settled.
+Looks like the trend of increasing agreeability sort of peaked in the 80s.
 
-### Summarizing by country
+### Summarizing by year and country
 
-In the last exercise, you performed a summary of the votes within each year. You could instead summarize() within each country, which would let you compare voting patterns between countries.
+Ok, that was nice so far, even though not terribly interesting, since it's hard to interpret aggregated numbers of almost all the world's countries combined. More tangible insights we might get when zooming in a single country, or comparing trends over a set of countries. Therefore we need a bit of a different data structure. We now need one observation not for year or country, but for every country and year. Fortunatelly, that's easily done via multiple groupings.
 
 ``` r
-votes %>%
-  group_by(country) %>%
+year_country <- votes %>%
+  group_by(year, country) %>%
   summarize(total = n(),
             percent_yes = mean(vote == 1))
+year_country
 ```
 
-    ## # A tibble: 199 x 3
-    ##    country           total percent_yes
-    ##    <chr>             <int>       <dbl>
-    ##  1 Afghanistan        2373       0.859
-    ##  2 Albania            1695       0.717
-    ##  3 Algeria            2213       0.899
-    ##  4 Andorra             719       0.638
-    ##  5 Angola             1431       0.924
-    ##  6 Antigua & Barbuda  1302       0.912
-    ##  7 Argentina          2553       0.768
-    ##  8 Armenia             758       0.747
-    ##  9 Australia          2575       0.557
-    ## 10 Austria            2389       0.622
-    ## # ... with 189 more rows
+    ## # A tibble: 4,737 x 4
+    ## # Groups:   year [?]
+    ##     year country     total percent_yes
+    ##    <dbl> <chr>       <int>       <dbl>
+    ##  1  1947 Afghanistan    34       0.382
+    ##  2  1947 Argentina      38       0.579
+    ##  3  1947 Australia      38       0.553
+    ##  4  1947 Belarus        38       0.5  
+    ##  5  1947 Belgium        38       0.605
+    ##  6  1947 Bolivia        37       0.595
+    ##  7  1947 Brazil         38       0.658
+    ##  8  1947 Canada         38       0.605
+    ##  9  1947 Chile          38       0.658
+    ## 10  1947 Colombia       35       0.543
+    ## # ... with 4,727 more rows
+
+Ok, with this datastructure, we can do some interesting analysis. For example, we can only look at the development of Danish votes by filtering.
+
+``` r
+year_country %>%
+  filter(country == "Denmark") %>%
+  ggplot(aes(x = year, y = percent_yes) ) +
+  geom_line() 
+```
+
+![](M1_2_data_munging_files/figure-markdown_github/unnamed-chunk-40-1.png)
+
+#### Digression: The `%in%` operator
+
+In case we want to compare a set of countries now, it would be convenient if we could select many of them in an easy way. Here, the `%in%` operator is handy. It basically just takes two vectors `x` and `y`, and for every element in `x` returns a Logical indication of this element is also contained in `y`. Example:
+
+``` r
+c("the", "cake", "is", "a", "lie") %in% c("I", "would", "love", "to", "eat", "a", "cake")
+```
+
+    ## [1] FALSE  TRUE FALSE  TRUE FALSE
+
+We can following the same idea create a vector of country anmes we want to compare, and then filter our dataset for these countries.
+
+``` r
+countries <- c("United States", "China", "France", "Denmark")
+
+year_country %>%
+  filter(country %in% countries)
+```
+
+    ## # A tibble: 124 x 4
+    ## # Groups:   year [34]
+    ##     year country       total percent_yes
+    ##    <dbl> <chr>         <int>       <dbl>
+    ##  1  1947 Denmark          38       0.632
+    ##  2  1947 France           38       0.737
+    ##  3  1947 United States    38       0.711
+    ##  4  1949 Denmark          63       0.302
+    ##  5  1949 France           64       0.312
+    ##  6  1949 United States    64       0.281
+    ##  7  1951 Denmark          25       0.4  
+    ##  8  1951 France           25       0.36 
+    ##  9  1951 United States    25       0.4  
+    ## 10  1953 Denmark          26       0.654
+    ## # ... with 114 more rows
+
+So,l lets plot these countries. To have them all displayed in one plot, we could either create a `geom_line()` for every subset (would be silly), or define in ggplot's `aes()` that the categorical variable `country` should be mapped with different colors. Therefore, for every country, a sepperate line in a different color will be created.
+
+``` r
+year_country %>%
+  filter(country %in% countries) %>%
+ggplot(aes(year, percent_yes, color = country)) +
+  geom_line()
+```
+
+![](M1_2_data_munging_files/figure-markdown_github/unnamed-chunk-43-1.png)
+
+We indeed see differences between countries. While denmark seens to be somewhat stable around 50% agreement and disagreement (the Danish style...), the USA over time moved to a very low rate of agreement. China, which got its UN seat just in the 70s, appears to be the mosyt agreeable country in our small sample.
+
+We could obviously go on with all kind of similar graphical analysis, but I do not want to spoiler too much of what is about to come in later sessions. So, lets leave it with that.
+
+Joining our data with contextual information
+--------------------------------------------
+
+Up to now, we just looked at general voting pattern, and then a bit more nuanced at pattern over time and across countries. What the specific votes whewre about, we up to now did not really care. However, every vote corresponds to an important geo- and sociopolitic issue. So, it's time to bring in a bit of context. Therefore, we will now also draw from an adittional dataset with more detailed information on the content of the corresponding vote, which we up to now treated as pure numbers. Lets take a look:
+
+``` r
+descriptions <- readRDS("data/descriptions.rds")
+descriptions
+```
+
+    ## # A tibble: 2,589 x 10
+    ##     rcid session date                unres      me    nu    di    hr    co
+    ##    <dbl>   <dbl> <dttm>              <chr>   <dbl> <dbl> <dbl> <dbl> <dbl>
+    ##  1    46       2 1947-09-04 00:00:00 R/2/299     0     0     0     0     0
+    ##  2    47       2 1947-10-05 00:00:00 R/2/355     0     0     0     1     0
+    ##  3    48       2 1947-10-06 00:00:00 R/2/461     0     0     0     0     0
+    ##  4    49       2 1947-10-06 00:00:00 R/2/463     0     0     0     0     0
+    ##  5    50       2 1947-10-06 00:00:00 R/2/465     0     0     0     0     0
+    ##  6    51       2 1947-10-02 00:00:00 R/2/561     0     0     0     0     1
+    ##  7    52       2 1947-11-06 00:00:00 R/2/650     0     0     0     0     1
+    ##  8    53       2 1947-11-06 00:00:00 R/2/651     0     0     0     0     1
+    ##  9    54       2 1947-11-06 00:00:00 R/2/651     0     0     0     0     1
+    ## 10    55       2 1947-11-06 00:00:00 R/2/667     0     0     0     0     1
+    ## # ... with 2,579 more rows, and 1 more variable: ec <dbl>
+
+We find the following variables: \* `rcid`: The corresponding ID, which we already know from the previous dataset \* `session`: Likewise, the corresponging session number \* `date`: The day of the vote \* `unres`: The code of the corresponding UN resolution (Check it out in private, is very interesting) Furthermore, there are 6 "dummy" (meaning 0 or 1 corresponding to FALSE or TRUE) regarding the broad topic of the resolution \* `me`: Palestinian conflict \* `nu`: Nuclear weapons and nuclear material \* `di`: Arms control and disarmament \* `hr`: Human rights \* `co`: Colonialism \* `ec`: Economic development
+
+Here, we only have one row per resolution, not as in `votes` one per country vote. Since both dataframes share the `rcid`and `session` variable, we can join on these to augment our votes data with contextual information.
+
+``` r
+votes_joined <- votes %>% select(-ccode) %>%
+  inner_join(descriptions %>% select(-date, -unres), by = c("rcid", "session"))
+```
+
+    ## Warning: Column `rcid` has different attributes on LHS and RHS of join
+
+    ## Warning: Column `session` has different attributes on LHS and RHS of join
+
+``` r
+votes_joined
+```
+
+    ## # A tibble: 353,547 x 11
+    ##     rcid session  vote  year country      me    nu    di    hr    co    ec
+    ##    <dbl>   <dbl> <dbl> <dbl> <chr>     <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>
+    ##  1    46       2     1  1947 United S~     0     0     0     0     0     0
+    ##  2    46       2     1  1947 Canada        0     0     0     0     0     0
+    ##  3    46       2     1  1947 Cuba          0     0     0     0     0     0
+    ##  4    46       2     1  1947 Haiti         0     0     0     0     0     0
+    ##  5    46       2     1  1947 Dominica~     0     0     0     0     0     0
+    ##  6    46       2     1  1947 Mexico        0     0     0     0     0     0
+    ##  7    46       2     1  1947 Guatemala     0     0     0     0     0     0
+    ##  8    46       2     1  1947 Honduras      0     0     0     0     0     0
+    ##  9    46       2     1  1947 El Salva~     0     0     0     0     0     0
+    ## 10    46       2     1  1947 Nicaragua     0     0     0     0     0     0
+    ## # ... with 353,537 more rows
+
+Here, we perform an `inner_join()`, meaning that it will contain only rows that appear in both dataframes. We do so since we from now on want to look only at votes with contextual information (which are missing in some cases). Note that we deselect unused variables in `description` directly in the join.
+
+Lets look what is voted in ceretain issues. Why not see how the USA over time voted on colonialism related issues.
+
+``` r
+votes_joined %>%
+  filter(country == "United States", co == 1) %>%
+  group_by(year) %>%
+  summarize(percent_yes = mean(vote == 1)) %>%
+  ggplot(aes(year, percent_yes)) +
+  geom_line()
+```
+
+![](M1_2_data_munging_files/figure-markdown_github/unnamed-chunk-46-1.png)
+
+We could also do the same exercise over all topics together in one plot.
+
+Working with tidy data (pivoting, reshaping, or changing between long and wide data formats)
+--------------------------------------------------------------------------------------------
+
+By now, we worked with the traditional data structure, where every column corresponds to one variable. We also call that a \*\*wide\*"\*\* data format. This is in most cases the most efficient and prefered way to keep your data. However, there are some cases, where another dataformat would be more convenient.
+
+For example, for range of graphical as well as numerical summaries, it would be nice to have every observation and every variable to be mapped in a single row. This format is also calles **long** (or in R slang, **tidy**) data. Adittionally, some real life datasets (including a lot of WorldBank, Eurostats, OECD, ect.) data is usually available in a long format. Therefore, weare in need of easily switching between long and wide formats, to **reshape** your data (in Excel slang, people call that **pivoting**).
+
+Luckily, R's `tidyr` package offers you exactly these functionalities in 4 easy functions.
+
+![tidyr](media/tidyr.png)
+
+In detail, they are: \* `gather()`: collapse columns into rows (wide to long) \* `spread()`: spread two columns into multiple columns (long to wide) \* `unite()`: Unite multiple columns into one \* `separate()`: separate one column into multiple
+
+### Tidying our data
+
+For our task, we will now reshape our dataframe from wide to long (tidy), therefore use the `gather()` function. In order to represent the joined vote-topic data in a tidy form so we can analyze and graph by topic, we need to transform the data so that each row has one combination of country-vote-topic. This will change the data from having six columns (`me`, `nu`, `di`, `hr`, `co`, `ec`) to having two columns (`topic` and `has_topic`).
+
+``` r
+library(tidyr)
+```
+
+    ## 
+    ## Attaching package: 'tidyr'
+
+    ## The following object is masked from 'package:magrittr':
+    ## 
+    ##     extract
+
+``` r
+votes_tidy <- votes_joined %>%
+  gather(topic, has_topic, me:ec) %>%
+  filter(has_topic == 1)
+votes_tidy
+```
+
+    ## # A tibble: 350,032 x 7
+    ##     rcid session  vote  year country            topic has_topic
+    ##    <dbl>   <dbl> <dbl> <dbl> <chr>              <chr>     <dbl>
+    ##  1    77       2     1  1947 United States      me            1
+    ##  2    77       2     1  1947 Canada             me            1
+    ##  3    77       2     3  1947 Cuba               me            1
+    ##  4    77       2     1  1947 Haiti              me            1
+    ##  5    77       2     1  1947 Dominican Republic me            1
+    ##  6    77       2     2  1947 Mexico             me            1
+    ##  7    77       2     1  1947 Guatemala          me            1
+    ##  8    77       2     2  1947 Honduras           me            1
+    ##  9    77       2     2  1947 El Salvador        me            1
+    ## 10    77       2     1  1947 Nicaragua          me            1
+    ## # ... with 350,022 more rows
+
+### Recoding the topics
+
+There's one more step of data cleaning to make this more interpretable. To interpret the data more easily, recode the data to replace these codes with their full name. You can do that with `dplyr`'s `recode()` function, which replaces values with ones you specify.
+
+``` r
+votes_tidy %<>%
+  mutate(topic = recode(topic,
+                        me = "Palestinian conflict",
+                        nu = "Nuclear weapons and nuclear material",
+                        di = "Arms control and disarmament",
+                        hr = "Human rights",
+                        co = "Colonialism",
+                        ec = "Economic development"))
+```
+
+### Summarize by country, year, and topic
+
+In previous exercises, you summarized the votes dataset by country, by year, and by country-year combination. Now that you have `topic` as an additional variable, you can summarize the votes for each combination of country, year, and topic (e.g. for the United States in 2013 on the topic of nuclear weapons.). This shows one of the advantages of working with tidy data: The ease to summarize lexible on categort+variable level.
+
+``` r
+votes_tidy %>%
+  group_by(country, year, topic) %>%
+  summarize(total = n(), percent_yes = mean(vote == 1)) %>%
+  ungroup()
+```
+
+    ## # A tibble: 26,926 x 5
+    ##    country      year topic                               total percent_yes
+    ##    <chr>       <dbl> <chr>                               <int>       <dbl>
+    ##  1 Afghanistan  1947 Colonialism                             8       0.5  
+    ##  2 Afghanistan  1947 Economic development                    1       0    
+    ##  3 Afghanistan  1947 Human rights                            1       0    
+    ##  4 Afghanistan  1947 Palestinian conflict                    6       0    
+    ##  5 Afghanistan  1949 Arms control and disarmament            3       0    
+    ##  6 Afghanistan  1949 Colonialism                            22       0.864
+    ##  7 Afghanistan  1949 Economic development                    1       1    
+    ##  8 Afghanistan  1949 Human rights                            3       0    
+    ##  9 Afghanistan  1949 Nuclear weapons and nuclear materi~     3       0    
+    ## 10 Afghanistan  1949 Palestinian conflict                   11       0.818
+    ## # ... with 26,916 more rows
+
+### Visualizing trends in topics for one country
+
+You can now visualize the trends in percentage "yes" over time for all six topics side-by-side. Here, you'll visualize them just for the United States.
+
+``` r
+votes_tidy %>%
+  group_by(country, year, topic) %>%
+  summarize(total = n(), percent_yes = mean(vote == 1)) %>%
+  ungroup() %>%
+  filter(country == "United States") %>%
+  ggplot(aes(year, percent_yes)) +
+  geom_line() +
+  facet_wrap(~ topic)
+```
+
+![](M1_2_data_munging_files/figure-markdown_github/unnamed-chunk-50-1.png)

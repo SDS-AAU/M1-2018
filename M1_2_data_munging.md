@@ -7,11 +7,21 @@ Introduction
 
 Welcome to your first SDS session. In this session, you will learn the basic grammar of data manipulation, some best-practice advices
 
-In our OWSEMN pipeline, we will here focus mainly in \* **O:** Obtaining our data \* **S:** Scrubbing / Cleaning our data
+In our OWSEMN pipeline, we will here focus mainly in
+
+-   **O:** Obtaining our data
+-   **S:** Scrubbing / Cleaning our data
 
 Particular focus will be on **S**, while we keep the **O** parts simple. More tricky data-gathering settings will be encountered in later sessions. Since data manipulation always follows a purpose and requires some understanding of the data at hand, we will also have a first glance in **E** (exploration and visualization). However, we will her only cover the very basics and skip most of the details. Again, you will have a dedicated sessions lateron.
 
-In this session, you will learn: \* How to do basic variable filtering, selection, and manipulation \* How to create various types of data summarization \* How to also apply these actions on grouped data \* How to join data from different sources \* How to reshape your data \* How to deal with missing values
+In this session, you will learn:
+
+-   How to do basic variable filtering, selection, and manipulation
+-   How to create various types of data summarization
+-   How to also apply these actions on grouped data
+-   How to join data from different sources
+-   How to reshape your data
+-   How to deal with missing values
 
 From my experience, this covers ca. 95% of common data manipulation tasks. Sound like fun? Lets get started!
 
@@ -28,16 +38,16 @@ x
 ```
 
     ##    id group       score
-    ## 1   1     B  0.97115585
-    ## 2   2     C -0.24221005
-    ## 3   3     B -0.07370607
-    ## 4   4     B  0.16389622
-    ## 5   5     A  0.91244156
-    ## 6   6     C  2.31686500
-    ## 7   7     C  0.19051753
-    ## 8   8     A -1.49445153
-    ## 9   9     B  1.10375701
-    ## 10 10     C -0.61726524
+    ## 1   1     A  1.42044097
+    ## 2   2     B -1.10640201
+    ## 3   3     A -0.22599494
+    ## 4   4     A -0.02825163
+    ## 5   5     C -0.50278158
+    ## 6   6     B -0.26689995
+    ## 7   7     B -1.05911064
+    ## 8   8     A -0.85893957
+    ## 9   9     C -0.74804725
+    ## 10 10     C -0.87548044
 
 Now, lets imaging we would like to sort, subset or aggregate it, we would do stuff like:
 
@@ -47,16 +57,16 @@ x[order(x$score),]
 ```
 
     ##    id group       score
-    ## 8   8     A -1.49445153
-    ## 10 10     C -0.61726524
-    ## 2   2     C -0.24221005
-    ## 3   3     B -0.07370607
-    ## 4   4     B  0.16389622
-    ## 7   7     C  0.19051753
-    ## 5   5     A  0.91244156
-    ## 1   1     B  0.97115585
-    ## 9   9     B  1.10375701
-    ## 6   6     C  2.31686500
+    ## 2   2     B -1.10640201
+    ## 7   7     B -1.05911064
+    ## 10 10     C -0.87548044
+    ## 8   8     A -0.85893957
+    ## 9   9     C -0.74804725
+    ## 5   5     C -0.50278158
+    ## 6   6     B -0.26689995
+    ## 3   3     A -0.22599494
+    ## 4   4     A -0.02825163
+    ## 1   1     A  1.42044097
 
 or
 
@@ -65,13 +75,8 @@ or
 x[x$score >= 0,]
 ```
 
-    ##   id group     score
-    ## 1  1     B 0.9711559
-    ## 4  4     B 0.1638962
-    ## 5  5     A 0.9124416
-    ## 6  6     C 2.3168650
-    ## 7  7     C 0.1905175
-    ## 9  9     B 1.1037570
+    ##   id group    score
+    ## 1  1     A 1.420441
 
 or
 
@@ -84,7 +89,18 @@ while that is all possible, the `[row, column]` syntax is not very comfortable. 
 
 The good news is: The efforts of a small set of key-developers (foremost [Hadley Wickham](http://hadley.nz/)) has let to the development of the [`tidyverse`](https://www.tidyverse.org/), an ecosystem of R packages particularly designed for data science applications. All packages share an underlying design philosophy, common API, grammar, and data structures.
 
-Among the most amazing contributions here is [`dplyr`](https://dplyr.tidyverse.org/), a grammar of data manipulation, providing a consistent set of verbs that help you solve the most common data manipulation challenges. I use `dplyr` for 90% of my data-manipulation tasks for the following reasons: \* All the underlying code is runs optimized in `C++`, making it faster than most base R \* It consistently unifies the grammar of data manipulation to a small set of operations, which can be flexibly combined to master almost every task \* It is designed to work neathly with the `%>%` pipe-operator of [magrittr](hhttps://magrittr.tidyverse.org/) (more on that later) \* its syntax is very similar to the logic of `SQL` and other data-management languages \* It expanded far beoyond its original 5 verbs, and now replaces most base R commands with optimized, clever, and high-performance altgernatives \* It works neathly with many databases, such as `SQL`
+Among the most amazing contributions here is [`dplyr`](https://dplyr.tidyverse.org/), a grammar of data manipulation, providing a consistent set of verbs that help you solve the most common data manipulation challenges. I use `dplyr` for 90% of my data-manipulation tasks for the following reasons:
+
+-   All the underlying code is runs optimized in `C++`, making it faster than most base R
+-   It consistently unifies the grammar of data manipulation to a small set of operations, which can be flexibly combined to master almost every task
+-   It is designed to work neathly with the `%>%` pipe-operator of [magrittr](hhttps://magrittr.tidyverse.org/) (more on that later)
+-   its syntax is very similar to the logic of `SQL` and other data-management languages
+-   It expanded far beoyond its original 5 verbs, and now replaces most base R commands with optimized, clever, and high-performance altgernatives
+-   It works neathly with many databases, such as `SQL`
+
+I will not touch on all packages there, but the complete `tidyverse` covers almost all issues of data manipulation. They all operate under the same logic, are fast, and usually your best choice for almost any given problem. Particularly `dplyr` is enourmeously powerfull, and has a lot more functions than the basics I cover here. So, for every given probloblem, your first question (to yourself or [stackoverflow](https://stackoverflow.com/)) should be:
+
+1: Is there a way to solve my problem in `dplyr`? 2: If not, is there another `tidyverse` package dedicated to this problem?
 
 General syntax
 --------------
@@ -93,9 +109,14 @@ So, let's zoom in the `dplyr` functionality and syntax for a moment, before we i
 
 dplyr is designed to abstract over how the data is stored. That means as well as working with local data frames, you can also work with remote database tables, using exactly the same R code. Install the `dbplyr` package then read `vignette("databases", package = "dbplyr")`.
 
-First, let's install (if necessary) and load it:
+First, let's install (if necessary) and load it. For the sake of illustration, I will load every package of the `tidyverse` one-by-one when we need it. However, normally I just load `library(tidyverse)` all at once, since I need a lot of these packages often anyhow
 
-    ## Warning: package 'dplyr' was built under R version 3.5.1
+``` r
+# # The easiest way to get dplyr is to install the whole tidyverse, including GGplot2 and all the stuff we will need later anyhow:
+# install.packages("tidyverse")
+# library(tidyverse) # To load the whole compilation of packages
+library(dplyr)
+```
 
     ## 
     ## Attaching package: 'dplyr'
@@ -107,6 +128,10 @@ First, let's install (if necessary) and load it:
     ## The following objects are masked from 'package:base':
     ## 
     ##     intersect, setdiff, setequal, union
+
+``` r
+library(magrittr) # For some advanced piping operations not included in dplyr
+```
 
 ### Piping in `dplyr`
 
@@ -1003,7 +1028,21 @@ descriptions
     ## 10    55       2 1947-11-06 00:00:00 R/2/667     0     0     0     0     1
     ## # ... with 2,579 more rows, and 1 more variable: ec <dbl>
 
-We find the following variables: \* `rcid`: The corresponding ID, which we already know from the previous dataset \* `session`: Likewise, the corresponging session number \* `date`: The day of the vote \* `unres`: The code of the corresponding UN resolution (Check it out in private, is very interesting) Furthermore, there are 6 "dummy" (meaning 0 or 1 corresponding to FALSE or TRUE) regarding the broad topic of the resolution \* `me`: Palestinian conflict \* `nu`: Nuclear weapons and nuclear material \* `di`: Arms control and disarmament \* `hr`: Human rights \* `co`: Colonialism \* `ec`: Economic development
+We find the following variables:
+
+-   `rcid`: The corresponding ID, which we already know from the previous dataset
+-   `session`: Likewise, the corresponging session number
+-   `date`: The day of the vote
+-   `unres`: The code of the corresponding UN resolution (Check it out in private, is very interesting)
+
+Furthermore, there are 6 "dummy" (meaning 0 or 1 corresponding to FALSE or TRUE) regarding the broad topic of the resolution
+
+-   `me`: Palestinian conflict
+-   `nu`: Nuclear weapons and nuclear material
+-   `di`: Arms control and disarmament
+-   `hr`: Human rights
+-   `co`: Colonialism
+-   `ec`: Economic development
 
 Little sidenote: We see that the `date` column here is formatted differntly, in the "YYYY-MM-DD" formaat. To transform it to a "YYYY" (year only) format, we could manipulate the string via **regular expressions** the `tidyverse` package [`stringr`](https://stringr.tidyverse.org) (which we will explore a bit later), or in base-R. However, working with differtent time format is always messy, and the `tidyverse` has a dedicated package for it, [`lubridate`](https://lubridate.tidyverse.org/). So we will use this opportunity for a simple date-transformation exercise:
 
@@ -1292,7 +1331,7 @@ Joining with macroeconomic data
 
 Ok, so far so good. To complement this exhaustive exercise, we will add some adittional economic data from the WorldBank. Most large economkic data providers such as the Worldbank, UN, OECD, and Eurostat by now offer access to their data via an API, so we can conveniently access their database directly from our laptop at home. Nice, right? How to work with APIs will be, again, a topic of later sessions, so do not expect too many details here.
 
-However, the large R community has made substantial effort to ease the access to govermental data, resulting in many packes serving as wrappers for the corresponding APIs. That means, most of these databases can nowadays be accessed via high-level R commands, without having to bother with the programming language of the API. Moste noteworthy, the [R openGov](http://ropengov.github.io/) initiative. For this exercise, we will use the [wbstats](https://github.com/GIST-ORNL/wbstats) package, which lets you easily search, access, and download tfrom the WorldBank data catalogue.
+However, the large R community has made substantial effort to ease the access to govermental data, resulting in many packes serving as wrappers for the corresponding APIs. That means, most of these databases can nowadays be accessed via high-level R commands, without having to bother with the programming language of the API. Moste noteworthy, the [R openGov](http://ropengov.github.io/) initiative. For this exercise, we will use the [`wbstats`](https://github.com/GIST-ORNL/wbstats) package, which lets you easily search, access, and download tfrom the WorldBank data catalogue.
 
 Summary & Wrapping up
 =====================

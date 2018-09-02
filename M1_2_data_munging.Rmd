@@ -12,12 +12,14 @@ knitr::opts_chunk$set(echo = TRUE)
 Welcome to your first SDS session. In this session, you will learn the basic grammar of data manipulation, some best-practice advices
 
 In our OWSEMN pipeline, we will here focus mainly in
+
 * **O:** Obtaining our data
 * **S:** Scrubbing / Cleaning our data
 
 Particular focus will be on **S**, while we keep the **O** parts simple. More tricky data-gathering settings will be encountered in later sessions. Since data manipulation always follows a purpose and requires some understanding of the data at hand, we will also have a first glance in **E** (exploration and visualization). However, we will her only cover the very basics and skip most of the details. Again, you will have a dedicated sessions lateron.
 
 In this session, you will learn:
+
 * How to do basic variable filtering, selection, and manipulation
 * How to create various types of data summarization
 * How to also apply these actions on grouped data
@@ -59,6 +61,7 @@ while that is all possible, the `[row, column]` syntax is not very comfortable. 
 The good news is: The efforts of a small set of key-developers (foremost [Hadley Wickham](http://hadley.nz/)) has let to the development of the  [`tidyverse`](https://www.tidyverse.org/), an ecosystem of R packages particularly designed for data science applications. All packages share an underlying design philosophy, common API, grammar, and data structures. 
 
 Among the most amazing contributions here is [`dplyr`](https://dplyr.tidyverse.org/), a grammar of data manipulation, providing a consistent set of verbs that help you solve the most common data manipulation challenges. I use `dplyr` for 90% of my data-manipulation tasks for the following reasons:
+
 * All the underlying code is runs optimized in `C++`, making it faster than most base R
 * It consistently unifies the grammar of data manipulation to a small set of operations, which can be flexibly combined to master almost every task
 * It is designed to work neathly with the `%>%` pipe-operator of [magrittr](hhttps://magrittr.tidyverse.org/) (more on that later)
@@ -66,15 +69,22 @@ Among the most amazing contributions here is [`dplyr`](https://dplyr.tidyverse.o
 * It expanded far beoyond its original 5 verbs, and now replaces most base R commands with optimized, clever, and high-performance altgernatives
 * It works neathly with many databases, such as `SQL`
 
+I will not touch on all packages there, but the complete `tidyverse` covers almost all issues of data manipulation. They all operate under the same logic, are fast, and usually your best choice for almost any given problem. Particularly `dplyr` is enourmeously powerfull, and has a lot more functions than the basics I cover here. So, for every given probloblem, your first question (to yourself or [stackoverflow](https://stackoverflow.com/)) should be:
+
+1: Is there a way to solve my problem in `dplyr`?
+2: If not, is there another `tidyverse` package dedicated to this problem?
+
 ## General syntax
 So, let's zoom in the `dplyr` functionality and syntax for a moment, before we illustrate it at the following data-manipulation tasks.
 
 dplyr is designed to abstract over how the data is stored. That means as well as working with local data frames, you can also work with remote database tables, using exactly the same R code. Install the `dbplyr` package then read `vignette("databases", package = "dbplyr")`.
 
-First, let's install (if necessary) and load it:
-```{r, echo = FALSE}
+First, let's install (if necessary) and load it. For the sake of illustration, I will load every package of the `tidyverse` one-by-one when we need it. However, normally I just load `library(tidyverse)` all at once, since I need a lot of these packages often anyhow
+
+```{r, warning = FALSE}
 # # The easiest way to get dplyr is to install the whole tidyverse, including GGplot2 and all the stuff we will need later anyhow:
 # install.packages("tidyverse")
+# library(tidyverse) # To load the whole compilation of packages
 library(dplyr)
 library(magrittr) # For some advanced piping operations not included in dplyr
 ```
@@ -226,6 +236,7 @@ Finally, `by_group()` is offers the perfect complement to the 5 basic verbs, sin
 ![Group](media/m1_dplyr_group.png)
 
 First of all, it works amazingly well with the `summarize()` verb, producing within group summaries
+
 ```{r}
 starwars %>% 
   group_by(homeworld) %>%
@@ -544,11 +555,14 @@ descriptions
 ```
 
 We find the following variables:
+
 * `rcid`: The corresponding ID, which we already know from the previous dataset
 * `session`: Likewise, the corresponging session number
 * `date`: The day of the vote
 * `unres`: The code of the corresponding UN resolution (Check it out in private, is very interesting)
+
 Furthermore, there are 6 "dummy" (meaning 0 or 1 corresponding to FALSE or TRUE) regarding the broad topic of the resolution
+
 * `me`: Palestinian conflict
 * `nu`: Nuclear weapons and nuclear material
 * `di`: Arms control and disarmament
@@ -711,7 +725,7 @@ The combined use of `group_by()`, `arrange()`, and `slice()` is extremely neath 
 ## Joining with macroeconomic data
 Ok, so far so good. To complement this exhaustive exercise, we will add some adittional economic data from the WorldBank. Most large economkic data providers such as the Worldbank, UN, OECD, and Eurostat by now offer access to their data via an API, so we can conveniently access their database directly from our laptop at home. Nice, right? How to work with APIs will be, again, a topic of later sessions, so do not expect too many details here.
 
-However, the large R community has made substantial effort to ease the access  to govermental data, resulting in many packes serving as wrappers for the corresponding APIs. That means, most of these databases can nowadays be accessed via high-level R commands, without having to bother with the programming language of the API. Moste noteworthy, the [R openGov](http://ropengov.github.io/) initiative. For this exercise, we will use the [wbstats](https://github.com/GIST-ORNL/wbstats) package, which lets you easily search, access, and download tfrom the WorldBank data catalogue.
+However, the large R community has made substantial effort to ease the access  to govermental data, resulting in many packes serving as wrappers for the corresponding APIs. That means, most of these databases can nowadays be accessed via high-level R commands, without having to bother with the programming language of the API. Moste noteworthy, the [R openGov](http://ropengov.github.io/) initiative. For this exercise, we will use the [`wbstats`](https://github.com/GIST-ORNL/wbstats) package, which lets you easily search, access, and download tfrom the WorldBank data catalogue.
 
 
 

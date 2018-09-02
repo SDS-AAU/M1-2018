@@ -5,9 +5,15 @@ Daniel S. Hain (<dsh@business.aau.dk>)
 Introduction
 ============
 
-blabla bla
+Welcome to your first SDS session. In this session, you will learn the basic grammar of data manipulation, some best-practice advices
 
-`code`
+In our OWSEMN pipeline, we will here focus mainly in \* **O:** Obtaining our data \* **S:** Scrubbing / Cleaning our data
+
+Particular focus will be on **S**, while we keep the **O** parts simple. More tricky data-gathering settings will be encountered in later sessions. Since data manipulation always follows a purpose and requires some understanding of the data at hand, we will also have a first glance in **E** (exploration and visualization). However, we will her only cover the very basics and skip most of the details. Again, you will have a dedicated sessions lateron.
+
+In this session, you will learn: \* How to do basic variable filtering, selection, and manipulation \* How to create various types of data summarization \* How to also apply these actions on grouped data \* How to join data from different sources \* How to reshape your data \* How to deal with missing values
+
+From my experience, this covers ca. 95% of common data manipulation tasks. Sound like fun? Lets get started!
 
 Before we start: Some digression on data manipulation workflopws with [`dplyr`](https://dplyr.tidyverse.org/)
 =============================================================================================================
@@ -22,16 +28,16 @@ x
 ```
 
     ##    id group       score
-    ## 1   1     A  0.89757977
-    ## 2   2     C -0.43508129
-    ## 3   3     B  0.19020396
-    ## 4   4     A  0.97967879
-    ## 5   5     A -2.05315824
-    ## 6   6     A -0.25699690
-    ## 7   7     B  1.54838109
-    ## 8   8     B  1.79553677
-    ## 9   9     A  2.73763571
-    ## 10 10     A  0.09400239
+    ## 1   1     B  0.97115585
+    ## 2   2     C -0.24221005
+    ## 3   3     B -0.07370607
+    ## 4   4     B  0.16389622
+    ## 5   5     A  0.91244156
+    ## 6   6     C  2.31686500
+    ## 7   7     C  0.19051753
+    ## 8   8     A -1.49445153
+    ## 9   9     B  1.10375701
+    ## 10 10     C -0.61726524
 
 Now, lets imaging we would like to sort, subset or aggregate it, we would do stuff like:
 
@@ -41,16 +47,16 @@ x[order(x$score),]
 ```
 
     ##    id group       score
-    ## 5   5     A -2.05315824
-    ## 2   2     C -0.43508129
-    ## 6   6     A -0.25699690
-    ## 10 10     A  0.09400239
-    ## 3   3     B  0.19020396
-    ## 1   1     A  0.89757977
-    ## 4   4     A  0.97967879
-    ## 7   7     B  1.54838109
-    ## 8   8     B  1.79553677
-    ## 9   9     A  2.73763571
+    ## 8   8     A -1.49445153
+    ## 10 10     C -0.61726524
+    ## 2   2     C -0.24221005
+    ## 3   3     B -0.07370607
+    ## 4   4     B  0.16389622
+    ## 7   7     C  0.19051753
+    ## 5   5     A  0.91244156
+    ## 1   1     B  0.97115585
+    ## 9   9     B  1.10375701
+    ## 6   6     C  2.31686500
 
 or
 
@@ -59,14 +65,13 @@ or
 x[x$score >= 0,]
 ```
 
-    ##    id group      score
-    ## 1   1     A 0.89757977
-    ## 3   3     B 0.19020396
-    ## 4   4     A 0.97967879
-    ## 7   7     B 1.54838109
-    ## 8   8     B 1.79553677
-    ## 9   9     A 2.73763571
-    ## 10 10     A 0.09400239
+    ##   id group     score
+    ## 1  1     B 0.9711559
+    ## 4  4     B 0.1638962
+    ## 5  5     A 0.9124416
+    ## 6  6     C 2.3168650
+    ## 7  7     C 0.1905175
+    ## 9  9     B 1.1037570
 
 or
 
@@ -129,6 +134,19 @@ x <- x %>%
 
 x %<>%
   filter(numbers > 8) 
+```
+
+In conclusion: The pipe basically passes on dataframe between functions in the following way:
+
+``` r
+x %>% fun(y)
+# Is equivalent to
+fun(x, y)
+
+# While
+x %<>% fun(y)
+# Is equivalent to
+x <- fun(x, y)
 ```
 
 ### The 5 core verbs of data-manipulation
@@ -547,7 +565,9 @@ df1 %>% left_join(df2, by = c("x" = "y"))
 
 ### FInal remarks
 
-xxxxx
+Even though that doesnt sound too much, when combining them right, these basic verbs will enable you to do ca 80% of common data manipulation tasks.
+
+![Cleaning](media/m1_tidy_workflow.png)
 
 Case Study: Cleaning up historical data on voting of the United Nations General Assembly
 ========================================================================================
@@ -697,13 +717,14 @@ votes  %>%
 
 Here,we tell `countrycode` to transfer the Correlates of War Code ("cown") to the easily readable country name ("country.name"). Other transformations such as to ISO2 and ISO3 alphanumerical codes are also possible. Neath, isn't it?
 
-Note that we up to now never changed the original `votes` data. All pipes upto now just created an output for illustration. To really change the data, we have to use the assign-and-pipe `%<>%`, or the manual assignment `<-`. So, lets finish this cleaning up and pipe the whole preprocessing all together.
+Note that we up to now never changed the original `votes` data. All pipes upto now just created an output for illustration. To really change the data, we have to use the assign-and-pipe `%<>%`, or the manual assignment `<-`. So, lets finish this cleaning up and pipe the whole preprocessing all together. Since not all counrty codes matched a country name, we will also filter the unmatchedc out
 
 ``` r
 votes %<>% 
   filter(vote <= 3) %>%
   mutate(year = session + 1945,
-         country = countrycode(ccode, "cown", "country.name"))
+         country = countrycode(ccode, "cown", "country.name")) %>%
+  filter(!is.na(country))
 ```
 
     ## Warning in countrycode(ccode, "cown", "country.name"): Some values were not matched unambiguously: 260, 816
@@ -712,7 +733,7 @@ votes %<>%
 votes
 ```
 
-    ## # A tibble: 353,547 x 6
+    ## # A tibble: 350,844 x 6
     ##     rcid session  vote ccode  year country           
     ##    <dbl>   <dbl> <dbl> <int> <dbl> <chr>             
     ##  1    46       2     1     2  1947 United States     
@@ -725,7 +746,7 @@ votes
     ##  8    46       2     1    91  1947 Honduras          
     ##  9    46       2     1    92  1947 El Salvador       
     ## 10    46       2     1    93  1947 Nicaragua         
-    ## # ... with 353,537 more rows
+    ## # ... with 350,834 more rows
 
 Generating first insights
 -------------------------
@@ -743,7 +764,7 @@ votes %>%
     ## # A tibble: 1 x 2
     ##    total percent_yes
     ##    <int>       <dbl>
-    ## 1 353547       0.800
+    ## 1 350844       0.801
 
 Ok, we see that in general, countries tend to be "aggreable". While nice to know, this is not terribly informative. As always, single numbers tell us little, trends, context, and comparison does usually provide more insights. So lets start with putting this number in perspective.
 
@@ -864,7 +885,7 @@ year %>%
   geom_line() 
 ```
 
-![](M1_2_data_munging_files/figure-markdown_github/unnamed-chunk-38-1.png)
+![](M1_2_data_munging_files/figure-markdown_github/unnamed-chunk-39-1.png)
 
 Looks like the trend of increasing agreeability sort of peaked in the 80s.
 
@@ -880,7 +901,7 @@ year_country <- votes %>%
 year_country
 ```
 
-    ## # A tibble: 4,737 x 4
+    ## # A tibble: 4,716 x 4
     ## # Groups:   year [?]
     ##     year country     total percent_yes
     ##    <dbl> <chr>       <int>       <dbl>
@@ -894,7 +915,7 @@ year_country
     ##  8  1947 Canada         38       0.605
     ##  9  1947 Chile          38       0.658
     ## 10  1947 Colombia       35       0.543
-    ## # ... with 4,727 more rows
+    ## # ... with 4,706 more rows
 
 Ok, with this datastructure, we can do some interesting analysis. For example, we can only look at the development of Danish votes by filtering.
 
@@ -905,7 +926,7 @@ year_country %>%
   geom_line() 
 ```
 
-![](M1_2_data_munging_files/figure-markdown_github/unnamed-chunk-40-1.png)
+![](M1_2_data_munging_files/figure-markdown_github/unnamed-chunk-41-1.png)
 
 #### Digression: The `%in%` operator
 
@@ -951,7 +972,7 @@ ggplot(aes(year, percent_yes, color = country)) +
   geom_line()
 ```
 
-![](M1_2_data_munging_files/figure-markdown_github/unnamed-chunk-43-1.png)
+![](M1_2_data_munging_files/figure-markdown_github/unnamed-chunk-44-1.png)
 
 We indeed see differences between countries. While denmark seens to be somewhat stable around 50% agreement and disagreement (the Danish style...), the USA over time moved to a very low rate of agreement. China, which got its UN seat just in the 70s, appears to be the mosyt agreeable country in our small sample.
 
@@ -984,22 +1005,58 @@ descriptions
 
 We find the following variables: \* `rcid`: The corresponding ID, which we already know from the previous dataset \* `session`: Likewise, the corresponging session number \* `date`: The day of the vote \* `unres`: The code of the corresponding UN resolution (Check it out in private, is very interesting) Furthermore, there are 6 "dummy" (meaning 0 or 1 corresponding to FALSE or TRUE) regarding the broad topic of the resolution \* `me`: Palestinian conflict \* `nu`: Nuclear weapons and nuclear material \* `di`: Arms control and disarmament \* `hr`: Human rights \* `co`: Colonialism \* `ec`: Economic development
 
-Here, we only have one row per resolution, not as in `votes` one per country vote. Since both dataframes share the `rcid`and `session` variable, we can join on these to augment our votes data with contextual information.
+Little sidenote: We see that the `date` column here is formatted differntly, in the "YYYY-MM-DD" formaat. To transform it to a "YYYY" (year only) format, we could manipulate the string via **regular expressions** the `tidyverse` package [`stringr`](https://stringr.tidyverse.org) (which we will explore a bit later), or in base-R. However, working with differtent time format is always messy, and the `tidyverse` has a dedicated package for it, [`lubridate`](https://lubridate.tidyverse.org/). So we will use this opportunity for a simple date-transformation exercise:
+
+``` r
+library(lubridate)
+```
+
+    ## 
+    ## Attaching package: 'lubridate'
+
+    ## The following object is masked from 'package:base':
+    ## 
+    ##     date
+
+``` r
+descriptions %<>%
+  mutate(year = year(date)) 
+descriptions
+```
+
+    ## # A tibble: 2,589 x 11
+    ##     rcid session date                unres      me    nu    di    hr    co
+    ##    <dbl>   <dbl> <dttm>              <chr>   <dbl> <dbl> <dbl> <dbl> <dbl>
+    ##  1    46       2 1947-09-04 00:00:00 R/2/299     0     0     0     0     0
+    ##  2    47       2 1947-10-05 00:00:00 R/2/355     0     0     0     1     0
+    ##  3    48       2 1947-10-06 00:00:00 R/2/461     0     0     0     0     0
+    ##  4    49       2 1947-10-06 00:00:00 R/2/463     0     0     0     0     0
+    ##  5    50       2 1947-10-06 00:00:00 R/2/465     0     0     0     0     0
+    ##  6    51       2 1947-10-02 00:00:00 R/2/561     0     0     0     0     1
+    ##  7    52       2 1947-11-06 00:00:00 R/2/650     0     0     0     0     1
+    ##  8    53       2 1947-11-06 00:00:00 R/2/651     0     0     0     0     1
+    ##  9    54       2 1947-11-06 00:00:00 R/2/651     0     0     0     0     1
+    ## 10    55       2 1947-11-06 00:00:00 R/2/667     0     0     0     0     1
+    ## # ... with 2,579 more rows, and 2 more variables: ec <dbl>, year <dbl>
+
+NEath, isnt it? In similar way, you can easily switch between date formats.
+
+We only have one row per resolution, not as in `votes` one per country vote. Since both dataframes share the `rcid`and `year` variable, we can join on these to augment our votes data with contextual information.
 
 ``` r
 votes_joined <- votes %>% select(-ccode) %>%
-  inner_join(descriptions %>% select(-date, -unres), by = c("rcid", "session"))
+  inner_join(descriptions %>% select(-date, -session, -unres), by = c("rcid", "year"))
 ```
 
     ## Warning: Column `rcid` has different attributes on LHS and RHS of join
 
-    ## Warning: Column `session` has different attributes on LHS and RHS of join
+    ## Warning: Column `year` has different attributes on LHS and RHS of join
 
 ``` r
 votes_joined
 ```
 
-    ## # A tibble: 353,547 x 11
+    ## # A tibble: 342,839 x 11
     ##     rcid session  vote  year country      me    nu    di    hr    co    ec
     ##    <dbl>   <dbl> <dbl> <dbl> <chr>     <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>
     ##  1    46       2     1  1947 United S~     0     0     0     0     0     0
@@ -1012,7 +1069,7 @@ votes_joined
     ##  8    46       2     1  1947 Honduras      0     0     0     0     0     0
     ##  9    46       2     1  1947 El Salva~     0     0     0     0     0     0
     ## 10    46       2     1  1947 Nicaragua     0     0     0     0     0     0
-    ## # ... with 353,537 more rows
+    ## # ... with 342,829 more rows
 
 Here, we perform an `inner_join()`, meaning that it will contain only rows that appear in both dataframes. We do so since we from now on want to look only at votes with contextual information (which are missing in some cases). Note that we deselect unused variables in `description` directly in the join.
 
@@ -1027,7 +1084,7 @@ votes_joined %>%
   geom_line()
 ```
 
-![](M1_2_data_munging_files/figure-markdown_github/unnamed-chunk-46-1.png)
+![](M1_2_data_munging_files/figure-markdown_github/unnamed-chunk-48-1.png)
 
 We could also do the same exercise over all topics together in one plot.
 
@@ -1048,6 +1105,8 @@ In detail, they are: \* `gather()`: collapse columns into rows (wide to long) \*
 
 For our task, we will now reshape our dataframe from wide to long (tidy), therefore use the `gather()` function. In order to represent the joined vote-topic data in a tidy form so we can analyze and graph by topic, we need to transform the data so that each row has one combination of country-vote-topic. This will change the data from having six columns (`me`, `nu`, `di`, `hr`, `co`, `ec`) to having two columns (`topic` and `has_topic`).
 
+![Gathering](media/m1_dplyr_gather.png)
+
 ``` r
 library(tidyr)
 ```
@@ -1066,7 +1125,7 @@ votes_tidy <- votes_joined %>%
 votes_tidy
 ```
 
-    ## # A tibble: 350,032 x 7
+    ## # A tibble: 342,295 x 7
     ##     rcid session  vote  year country            topic has_topic
     ##    <dbl>   <dbl> <dbl> <dbl> <chr>              <chr>     <dbl>
     ##  1    77       2     1  1947 United States      me            1
@@ -1079,7 +1138,7 @@ votes_tidy
     ##  8    77       2     2  1947 Honduras           me            1
     ##  9    77       2     2  1947 El Salvador        me            1
     ## 10    77       2     1  1947 Nicaragua          me            1
-    ## # ... with 350,022 more rows
+    ## # ... with 342,285 more rows
 
 ### Recoding the topics
 
@@ -1107,7 +1166,7 @@ votes_tidy %>%
   ungroup()
 ```
 
-    ## # A tibble: 26,926 x 5
+    ## # A tibble: 26,608 x 5
     ##    country      year topic                               total percent_yes
     ##    <chr>       <dbl> <chr>                               <int>       <dbl>
     ##  1 Afghanistan  1947 Colonialism                             8       0.5  
@@ -1120,11 +1179,26 @@ votes_tidy %>%
     ##  8 Afghanistan  1949 Human rights                            3       0    
     ##  9 Afghanistan  1949 Nuclear weapons and nuclear materi~     3       0    
     ## 10 Afghanistan  1949 Palestinian conflict                   11       0.818
-    ## # ... with 26,916 more rows
+    ## # ... with 26,598 more rows
 
 ### Visualizing trends in topics for one country
 
-You can now visualize the trends in percentage "yes" over time for all six topics side-by-side. Here, you'll visualize them just for the United States.
+Now we have a unique mapping of country, year, and topic, therefore can sily create summaries and summary graphs on all kind of level. For example, lets compare how the USA and Denmark over time voted on different topics. To create the plots for all topic at once, we will introduce a new `ggplot2` geometry, a `facet_wrap` over `topic`. This just creates a sepperate plot for every category within `topic`. Just take it here for the sake of illustration, the details will be covered in later sessions.
+
+``` r
+votes_tidy %>%
+  group_by(country, year, topic) %>%
+  summarize(total = n(), percent_yes = mean(vote == 1)) %>%
+  ungroup() %>%
+  filter(country %in% c("United States", "Denmark")) %>%
+  ggplot(aes(x = year, y = percent_yes, color = country)) +
+  geom_line() +
+  facet_wrap(~ topic)
+```
+
+![](M1_2_data_munging_files/figure-markdown_github/unnamed-chunk-52-1.png)
+
+Up to now, we always created line plots (`geom_line()`), but we could also do a scatterplot (`geom_point()`). To make time-trends more visible, we could add a smoothed trend-line (`geom_smooth(se = FALSE)`, don't bother with the details for now)
 
 ``` r
 votes_tidy %>%
@@ -1132,9 +1206,93 @@ votes_tidy %>%
   summarize(total = n(), percent_yes = mean(vote == 1)) %>%
   ungroup() %>%
   filter(country == "United States") %>%
-  ggplot(aes(year, percent_yes)) +
-  geom_line() +
+  ggplot(aes(x = year, y = percent_yes)) +
+  geom_point() +
+  geom_smooth(se = FALSE) +
   facet_wrap(~ topic)
 ```
 
-![](M1_2_data_munging_files/figure-markdown_github/unnamed-chunk-50-1.png)
+    ## `geom_smooth()` using method = 'loess' and formula 'y ~ x'
+
+![](M1_2_data_munging_files/figure-markdown_github/unnamed-chunk-53-1.png)
+
+Ok, byt that's enough about visualization for now, I do not want to spoiler too much. Only thing I wanted to illustrate here is how easily multiple geometric layers can be added in ine plot.
+
+Another intersting thing we could do now is to find the most aggreable topic per country, emaning the one every country is most inclined to voe for "yes". As you will see, that is easily done in tidy data with combining the well known verbs. You're getting a hang on it, right?
+
+``` r
+votes_tidy %>%
+  group_by(country, topic) %>%
+  summarize(total = n(), percent_yes = mean(vote == 1)) %>%
+  ungroup() %>%
+  arrange(country, desc(total)) %>%
+  group_by(country) %>%
+  slice(1) %>%
+  ungroup() %>%
+  filter(total > 50) %>%
+  arrange(desc(percent_yes))
+```
+
+    ## # A tibble: 195 x 4
+    ##    country             topic                total percent_yes
+    ##    <chr>               <chr>                <int>       <dbl>
+    ##  1 Azerbaijan          Palestinian conflict   212       1    
+    ##  2 Namibia             Palestinian conflict   225       1    
+    ##  3 Seychelles          Palestinian conflict   237       1    
+    ##  4 Mozambique          Palestinian conflict   427       0.998
+    ##  5 Djibouti            Palestinian conflict   426       0.998
+    ##  6 Zimbabwe            Palestinian conflict   379       0.995
+    ##  7 Bangladesh          Palestinian conflict   451       0.993
+    ##  8 Comoros             Palestinian conflict   283       0.993
+    ##  9 São Tomé & Príncipe Palestinian conflict   251       0.992
+    ## 10 North Korea         Palestinian conflict   224       0.991
+    ## # ... with 185 more rows
+
+Similarly, we could look at the top-3 countries in favor of every topic.
+
+``` r
+votes_tidy %>%
+  group_by(country, topic) %>%
+  summarize(total = n(), percent_yes = mean(vote == 1)) %>%
+  ungroup() %>%
+  filter(total > 50) %>%
+  arrange(topic, desc(percent_yes), desc(total)) %>%
+  group_by(topic) %>%
+  slice(1:3) %>%
+  select(topic, everything())
+```
+
+    ## # A tibble: 18 x 4
+    ## # Groups:   topic [6]
+    ##    topic                                country          total percent_yes
+    ##    <chr>                                <chr>            <int>       <dbl>
+    ##  1 Arms control and disarmament         Brunei             254       0.984
+    ##  2 Arms control and disarmament         Botswana           343       0.983
+    ##  3 Arms control and disarmament         Namibia            170       0.982
+    ##  4 Colonialism                          China              290       1    
+    ##  5 Colonialism                          Zimbabwe           190       1    
+    ##  6 Colonialism                          Brunei             164       1    
+    ##  7 Economic development                 Guinea-Bissau      155       1    
+    ##  8 Economic development                 São Tomé & Prín~   121       1    
+    ##  9 Economic development                 Seychelles          77       1    
+    ## 10 Human rights                         Seychelles         142       0.986
+    ## 11 Human rights                         São Tomé & Prín~   186       0.962
+    ## 12 Human rights                         Mauritius          350       0.929
+    ## 13 Nuclear weapons and nuclear material Zimbabwe           218       0.995
+    ## 14 Nuclear weapons and nuclear material Bahrain            306       0.993
+    ## 15 Nuclear weapons and nuclear material Botswana           276       0.993
+    ## 16 Palestinian conflict                 Seychelles         237       1    
+    ## 17 Palestinian conflict                 Namibia            225       1    
+    ## 18 Palestinian conflict                 Azerbaijan         212       1
+
+The combined use of `group_by()`, `arrange()`, and `slice()` is extremely neath to produce all kind of top-n summaries.
+
+Joining with macroeconomic data
+-------------------------------
+
+Ok, so far so good. To complement this exhaustive exercise, we will add some adittional economic data from the WorldBank. Most large economkic data providers such as the Worldbank, UN, OECD, and Eurostat by now offer access to their data via an API, so we can conveniently access their database directly from our laptop at home. Nice, right? How to work with APIs will be, again, a topic of later sessions, so do not expect too many details here.
+
+However, the large R community has made substantial effort to ease the access to govermental data, resulting in many packes serving as wrappers for the corresponding APIs. That means, most of these databases can nowadays be accessed via high-level R commands, without having to bother with the programming language of the API. Moste noteworthy, the [R openGov](http://ropengov.github.io/) initiative. For this exercise, we will use the [wbstats](https://github.com/GIST-ORNL/wbstats) package, which lets you easily search, access, and download tfrom the WorldBank data catalogue.
+
+Summary & Wrapping up
+=====================

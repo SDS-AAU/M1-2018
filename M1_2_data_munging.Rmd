@@ -9,9 +9,23 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # Introduction
-blabla bla
+Welcome to your first SDS session. In this session, you will learn the basic grammar of data manipulation, some best-practice advices
 
-`code`
+In our OWSEMN pipeline, we will here focus mainly in
+* **O:** Obtaining our data
+* **S:** Scrubbing / Cleaning our data
+
+Particular focus will be on **S**, while we keep the **O** parts simple. More tricky data-gathering settings will be encountered in later sessions. Since data manipulation always follows a purpose and requires some understanding of the data at hand, we will also have a first glance in **E** (exploration and visualization). However, we will her only cover the very basics and skip most of the details. Again, you will have a dedicated sessions lateron.
+
+In this session, you will learn:
+* How to do basic variable filtering, selection, and manipulation
+* How to create various types of data summarization
+* How to also apply these actions on grouped data
+* How to join data from different sources
+* How to reshape your data
+* How to deal with missing values
+
+From my experience, this covers ca. 95% of common data manipulation tasks. Sound like fun? Lets get started!
 
 # Before we start: Some digression on data manipulation workflopws with [`dplyr`](https://dplyr.tidyverse.org/)
 Base R comes with quite some functionality for slicing and dicing data, there also exists a myriad specialized packages for more tricky data manipulation. To read others' code and example as well as to perform some special operations, you all should be able to use standard R syntax. Lets create a super-simple dataframe and slice it a bit. Lets imagine we have 10 persons with a corresponging numeric id, and some value, such as an IQ score. Soem are members of group A, and some of group B or C. We generate that all somnewhat random:
@@ -94,6 +108,20 @@ x <- x %>%
 
 x %<>%
   filter(numbers > 8) 
+```
+
+In conclusion:
+The pipe basically passes on dataframe between functions in the following way:
+
+```{r, eval = FALSE}
+x %>% fun(y)
+# Is equivalent to
+fun(x, y)
+
+# While
+x %<>% fun(y)
+# Is equivalent to
+x <- fun(x, y)
 ```
 
 
@@ -277,7 +305,9 @@ df1 %>% left_join(df2, by = c("x" = "y"))
 ```
 
 ###  FInal remarks
-xxxxx
+Even though that doesnt sound too much, when combining them right, these basic verbs will enable you to do ca 80% of common data manipulation tasks.
+
+![Cleaning](media/m1_tidy_workflow.png)
 
 # Case Study: Cleaning up historical data on voting of the United Nations General Assembly
 
@@ -359,13 +389,14 @@ votes  %>%
 
 Here,we tell `countrycode` to transfer the Correlates of War Code ("cown") to the easily readable country name ("country.name"). Other transformations such as to ISO2 and ISO3 alphanumerical codes are also possible. Neath, isn't it?
 
-Note that we up to now never changed the original `votes` data. All pipes upto now just created an output for illustration. To really change the data, we have to use the assign-and-pipe `%<>%`, or the manual assignment `<-`. So, lets finish this cleaning up and pipe the whole preprocessing all together.
+Note that we up to now never changed the original `votes` data. All pipes upto now just created an output for illustration. To really change the data, we have to use the assign-and-pipe `%<>%`, or the manual assignment `<-`. So, lets finish this cleaning up and pipe the whole preprocessing all together. Since not all counrty codes matched a country name, we will also filter the unmatchedc out
 
 ```{r}
 votes %<>% 
   filter(vote <= 3) %>%
   mutate(year = session + 1945,
-         country = countrycode(ccode, "cown", "country.name"))
+         country = countrycode(ccode, "cown", "country.name")) %>%
+  filter(!is.na(country))
 votes
 ```
 
@@ -525,12 +556,23 @@ Furthermore, there are 6 "dummy" (meaning 0 or 1 corresponding to FALSE or TRUE)
 * `co`: Colonialism
 * `ec`: Economic development
 
-Here, we only have one row per resolution, not as in `votes` one per country vote. Since both dataframes share the `rcid`and `session` variable, we can join on these to augment our votes data with contextual information.
+Little sidenote: We see that the `date` column here is formatted differntly, in the "YYYY-MM-DD" formaat. To transform it to a "YYYY" (year only) format, we could manipulate the string via **regular expressions** the `tidyverse` package [`stringr`](https://stringr.tidyverse.org) (which we will explore a bit later), or in base-R. However, working with differtent time format is always messy, and the `tidyverse` has a dedicated package for it, [`lubridate`](https://lubridate.tidyverse.org/). So we will use this opportunity for a simple date-transformation exercise:
+
+```{r}
+library(lubridate)
+descriptions %<>%
+  mutate(year = year(date)) 
+descriptions
+```
+
+NEath, isnt it? In similar way, you can easily switch between date formats.
+
+We only have one row per resolution, not as in `votes` one per country vote. Since both dataframes share the `rcid`and `year` variable, we can join on these to augment our votes data with contextual information.
 
 
 ```{r}
 votes_joined <- votes %>% select(-ccode) %>%
-  inner_join(descriptions %>% select(-date, -unres), by = c("rcid", "session"))
+  inner_join(descriptions %>% select(-date, -session, -unres), by = c("rcid", "year"))
 votes_joined
 ```
 
@@ -568,6 +610,8 @@ In detail, they are:
 ### Tidying our data
 For our task, we will now reshape our dataframe from wide to long (tidy), therefore use the `gather()` function. In order to represent the joined vote-topic data in a tidy form so we can analyze and graph by topic, we need to transform the data so that each row has one combination of country-vote-topic. This will change the data from having six columns (`me`, `nu`, `di`, `hr`, `co`, `ec`) to having two columns (`topic` and `has_topic`).
 
+![Gathering](media/m1_dplyr_gather.png)
+
 ```{r}
 library(tidyr)
 votes_tidy <- votes_joined %>%
@@ -601,7 +645,21 @@ votes_tidy %>%
 ```
 
 ### Visualizing trends in topics for one country
-You can now visualize the trends in percentage "yes" over time for all six topics side-by-side. Here, you'll visualize them just for the United States.
+Now we have a unique mapping of country, year, and topic, therefore can sily create summaries and summary graphs on all kind of level. For example, lets compare how the USA and Denmark over time voted on different topics. To create the plots for all topic at once, we will introduce a new `ggplot2` geometry, a `facet_wrap` over `topic`. This just creates a sepperate plot for every category within `topic`. Just take it here for the sake of illustration, the details will be covered in later sessions.
+
+```{r}
+votes_tidy %>%
+  group_by(country, year, topic) %>%
+  summarize(total = n(), percent_yes = mean(vote == 1)) %>%
+  ungroup() %>%
+  filter(country %in% c("United States", "Denmark")) %>%
+  ggplot(aes(x = year, y = percent_yes, color = country)) +
+  geom_line() +
+  facet_wrap(~ topic)
+```
+
+Up to now, we always created line plots (`geom_line()`), but we could also do a scatterplot (`geom_point()`). To make time-trends more visible, we could add a smoothed trend-line (`geom_smooth(se = FALSE)`, don't bother with the details for now)
+
 
 ```{r}
 votes_tidy %>%
@@ -609,8 +667,54 @@ votes_tidy %>%
   summarize(total = n(), percent_yes = mean(vote == 1)) %>%
   ungroup() %>%
   filter(country == "United States") %>%
-  ggplot(aes(year, percent_yes)) +
-  geom_line() +
+  ggplot(aes(x = year, y = percent_yes)) +
+  geom_point() +
+  geom_smooth(se = FALSE) +
   facet_wrap(~ topic)
 ```
 
+Ok, byt that's enough about visualization for now, I do not want to spoiler too much. Only thing I wanted to illustrate here is how easily multiple geometric layers can be added in ine plot. 
+
+Another intersting thing we could do now is to find the most aggreable topic per country, emaning the one every country is most inclined to voe for "yes". As you will see, that is easily done in tidy data with combining the well known verbs. You're getting a hang on it, right?
+
+
+
+```{r}
+votes_tidy %>%
+  group_by(country, topic) %>%
+  summarize(total = n(), percent_yes = mean(vote == 1)) %>%
+  ungroup() %>%
+  arrange(country, desc(total)) %>%
+  group_by(country) %>%
+  slice(1) %>%
+  ungroup() %>%
+  filter(total > 50) %>%
+  arrange(desc(percent_yes))
+```
+
+Similarly, we could look at the top-3 countries in favor of every topic.
+
+```{r}
+votes_tidy %>%
+  group_by(country, topic) %>%
+  summarize(total = n(), percent_yes = mean(vote == 1)) %>%
+  ungroup() %>%
+  filter(total > 50) %>%
+  arrange(topic, desc(percent_yes), desc(total)) %>%
+  group_by(topic) %>%
+  slice(1:3) %>%
+  select(topic, everything())
+```
+
+The combined use of `group_by()`, `arrange()`, and `slice()` is extremely neath to produce all kind of top-n summaries.
+
+## Joining with macroeconomic data
+Ok, so far so good. To complement this exhaustive exercise, we will add some adittional economic data from the WorldBank. Most large economkic data providers such as the Worldbank, UN, OECD, and Eurostat by now offer access to their data via an API, so we can conveniently access their database directly from our laptop at home. Nice, right? How to work with APIs will be, again, a topic of later sessions, so do not expect too many details here.
+
+However, the large R community has made substantial effort to ease the access  to govermental data, resulting in many packes serving as wrappers for the corresponding APIs. That means, most of these databases can nowadays be accessed via high-level R commands, without having to bother with the programming language of the API. Moste noteworthy, the [R openGov](http://ropengov.github.io/) initiative. For this exercise, we will use the [wbstats](https://github.com/GIST-ORNL/wbstats) package, which lets you easily search, access, and download tfrom the WorldBank data catalogue.
+
+
+
+
+
+# Summary & Wrapping up

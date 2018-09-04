@@ -1,27 +1,35 @@
 ---
-title: "SDS M1-1: The Datascience Pipeline"
+title: 'SDS M1-1: The Datascience Pipeline'
 author: "Daniel S. Hain (dsh@business.aau.dk)"
-output: github_document
+date: "06/09/2018"
+output:
+  html_document:
+    df_print: paged
+    toc: yes
+  html_notebook:
+    df_print: kable
+    number_sections: yes
+    toc: yes
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # Introduction
 
 ## So it shall beginn...
-> "Believe it or not, you are no different than Data. Put yourself into Data’s shoes and you’ll see why.""
+> "Believe it or not, you are no different than Data. Put yourself into Data's shoes and you'll see why.""
 
 Once upon a time there was a boy named Data. Throughout his life, he was always trying to understand what his purpose was. What values do I have? What impact can I make on this world? Where does Data come from? See any similarities between you and Data? These questions were always in his mind and fortunately, through sheer luck, Data finally came across a solution and went through a great transformation.
 
 
 # The Data Science Pipeline
-It all started as Data was walking down the rows when he came across a weird, yet interesting, pipe. On one end was a pipe with an entrance and at the other end an exit. The pipe was also labeled with five distinct letters: “O.S.E.M.N.”. Curious as he was, Data decided to enter the pipeline. Long story short… in came data and out came insight.
+It all started as Data was walking down the rows when he came across a weird, yet interesting, pipe. On one end was a pipe with an entrance and at the other end an exit. The pipe was also labeled with five distinct letters: **O.S.E.M.N.**. Curious as he was, Data decided to enter the pipeline. Long story short: in came data and out came insight.
 
 ![The adventures of Data](media/OSEMN.png)
 
-Data soon realized: "You’re awesome. I’m awesome. Data Science is OSEMN!"". So, let's disect what happened in this OSEMN pipe.
+Data soon realized: "You'Re awesome. I'm awesome. Data Science is OSEMN!". So, let's disect what happened in this OSEMN pipe.
 
 * **O:** Obtaining our data
 * **S:** Scrubbing / Cleaning our data
@@ -61,7 +69,7 @@ So, we got all our data together. Yet, in most cases the really hard part begins
 ![Cleaning](media/m1_cleaning.jpg)
 
 ### Objective:
-* Examine the data: understand every feature you’re working with, identify errors, missing values, and corrupt records
+* Examine the data: understand every feature you're working with, identify errors, missing values, and corrupt records
 * Clean the data: throw away, replace, and/or fill missing values/errors
 
 ### Skills Required:
@@ -99,8 +107,6 @@ So, we got all our data together. Yet, in most cases the really hard part begins
 
 ## **M:** Modeling our data
 
-> “Models are opinions embedded in mathematics” - Cathy O’Neil
-
 ### Objective:
 * In-depth Analytics: create predictive models/algorithms
 * Select appropriate model setups and choose model classes
@@ -114,9 +120,6 @@ So, we got all our data together. Yet, in most cases the really hard part begins
 * ML libraries for R
     * Caret
 * Linear algebra & Multivariate Calculus
-
-
-
 
 
 ## **N:** iNterpreting our data
@@ -144,7 +147,7 @@ So, we got all our data together. Yet, in most cases the really hard part begins
 
 
 # Conclusion
-> Remember, we’re no different than Data. We both have values, a purpose, and a reason to exist in this world.
+> Remember, we're no different than Data. We both have values, a purpose, and a reason to exist in this world.
 
 In Summary, XXXXX
 

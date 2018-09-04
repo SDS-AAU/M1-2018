@@ -1,7 +1,15 @@
 ---
 title: "M1-2: Data Munging"
 author: "Daniel S. Hain (dsh@business.aau.dk)"
-output: github_document
+date: "06/09/2018"
+output:
+  html_document:
+    df_print: paged
+    toc: yes
+  html_notebook:
+    df_print: kable
+    number_sections: yes
+    toc: yes
 ---
 
 ```{r setup, include = FALSE}

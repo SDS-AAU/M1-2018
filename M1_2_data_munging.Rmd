@@ -3,12 +3,12 @@ title: 'M1-2: Data Munging'
 author: "Daniel S. Hain (dsh@business.aau.dk)"
 date: "06/09/2018"
 output:
+  html_document:
+    df_print: paged
+    toc: yes
   html_notebook:
     df_print: paged
     number_sections: no
-    toc: yes
-  html_document:
-    df_print: paged
     toc: yes
 ---
 

@@ -387,6 +387,14 @@ So, to sum up:
 
 ## Step 3: Preprocessing
 
+Whatever data you obtian, it usually needs a bit of manual "massage" to be ready for further analysis. Common steps here are
+
+1. Check variable format (dates, strings, numeric etc.)
+2. Check variable scaling (range, outliers)
+3. Deal with missing values
+
+While there are some more issues you could run into, we in the following go through a couple of common problems and see some easy ways how to solve them.
+
 ### Filtering
 One step of data cleaning is removing observations (rows) that you're not interested in. In this case, you want to remove "Not present" and "Not a member". Since we are for now not interested in them, lets get rid of them
 
@@ -745,12 +753,126 @@ However, the large R community has made substantial effort to ease the access  t
 Lets check it out!
 
 ```{r}
+# install.packages("wbstats")
+library(wbstats)
+```
+
+Sidenote: The packages at `cran` are the official releases. Some small packages, or the new version fo a known one, are not to be found there. However, we can also directly install them from `github`, using the `install_github()` function of the `devtools package`
+
+## Download WB data
+```{r, eval = FALSE}
+install.packages("devtools")
+devtools::install_github("GIST-ORNL/wbstats") # the :: lets you use a function of a package without pre-loading it.
+```
+
+The package is pretty cool, and lets us search the whole WB data native from our R
+
+```{r}
+str(wb_cachelist, max.level = 1)
+```
+
+We can also search indicators by text-pattern
+
+```{r}
+wbsearch(pattern = "military")
+```
+
+Interesting, lets get some military related variables out...
+
+```{r}
+military_data <- wb(indicator = c("MS.MIL.XPND.GD.ZS", "MS.MIL.XPRT.KD", "MS.MIL.TOTL.TF.ZS"), startdate = 1980, enddate = 2015)
+head(military_data)
+skim(military_data)
+```
+
+## Clean the data a bit
+Tada! That was easy. However, we already see some issues with our data we need to solve before we can conveniently work with it.
+
+1. The "Date" (meaning "year") variable is coded as a character string. We would like to have a numeric value (like in our viting data) instead
+2. The basolute variable ``
+3. The counrty names might not be written 100% as in our data. We might want to join via the normed "iso3" countrycode instead.
+4. The data we get from the WB is "tidy" (long). In casde we want to join it with our data, we are in need of making it a wide dataset again.
+
+Lets do that!
+
+```{r}
+military_cleaned <- military_data %>%
+  rename(year = date) %>%
+  mutate(year = as.numeric(year),
+         country = countrycode(iso3c, "iso3c", "country.name") ) %>%
+  filter(!is.na(country)) %>%
+  select(country, year, indicatorID, value) %>%
+  spread(key =  indicatorID, value = value) %>%
+  mutate(MS.MIL.XPRT.KD = log(MS.MIL.XPRT.KD))
+
+head(military_cleaned)
+skim(military_cleaned)
+```
+
+Lets see who spends most...
+
+```{r}
+military_cleaned %>%
+  group_by(country) %>%
+  summarize(mil.gdp = mean(MS.MIL.XPND.GD.ZS)) %>%
+  arrange(desc(mil.gdp)) %>%
+  head(10)
+```
+
+## Replace missing values
+However, we have already seen that we have a lot of missing data for some of the indicators. We coudld eal with it here right now. However, the data is otherwise ready to be joined with our `votes` data. Let's in this case first join the data, then deal with missing variables.
+
+```{r}
+votes_joined2 <- votes_joined %>%
+  filter(year >= 1980, year <= 2015) %>%
+  left_join(military_cleaned, by = c("country", "year"))
+
+# We also get rid of countries that are not present in our military data
+votes_joined2 <- votes_joined2 %>%
+  semi_join(military_cleaned, by = "country")
+skim(votes_joined2)
+```
+
+Ok, in the final dataset, the variables `MS.MIL.XPRT.KD` and `MS.MIL.TOTL.TF.ZS` still have just to many missing observations to deal with it (more or almost more missing than complete). so we drop them. 
+
+```{r}
+votes_joined2 %<>%
+  select(-MS.MIL.XPRT.KD, -MS.MIL.TOTL.TF.ZS)
 
 ```
 
 
+However, for `MS.MIL.XPND.GD.ZS` we have a kint-of ok coverage. So in case wen want to go on analyzing military spending, lets figure out what to do. We here have a couple of strategies....
 
+1. We could just ignore them. 
+2. We could also delete them
+3. We could replace them by their mean
+4. We could use advanced imputation techniques, eg. from the `mice`, `VIM`, `missForest`, `Amelia`, or `Hmisc` package (worth checking out)
+5. We could try to exploit the time-series characteristics of our data for an imputation strategy.
 
+Number 1-3 are trivial, and I guess you will manage on your own (hint, `dplyr`'s `replace_na()` function is convenient). Number 4 often makes sense and is worth investigating further, but for the sake of brevity,we will stick to number 5. here, often a good choice when working with time-series.
+
+Here, we will use the `na.locf()` function from the `zoo` (a package specialized on working with time series data). "locf" stands for "last-observation-carried-forward", and what this function does is replacing a missing value by its previous value, if existing. Therefore, the data obviously has to be arranged in the right way (country, year). Furthermore, we before group by countries, that this behaviour only happens within a country, and values do not "spill-over" to the next country.
+
+```{r}
+# install.packages("zoo")
+library(zoo)
+votes_joined2 %<>%
+  arrange(country, year) %>%
+  group_by(country) %>% mutate_all(funs(na.locf(., na.rm = F))) %>% ungroup()
+```
+
+So, that's as good as it gets for now. Lets see whats in the new data. The first obvious question would be: Does military expenditure somewhat correlate with a countries voting behavior at the UN? 
+
+## Your turn
+
+Well, what about giving it a try on your own? A folder awaits you ready to download [---> HERE <---](https://github.com/SDS-AAU/M1-2018/tree/master/data), giving you the chance to explore a bit on your own. You could:
+
+1. Start reconstructing the exercise done so far. Feel free to alter what you feel needs to be altered.
+2. Do some own exploration of issues and relationships you find interesting.
+3. Maybe add some other WB (or other source) data, to explore even further relationships
+
+HAve fun...
 
 # Summary & Wrapping up
 

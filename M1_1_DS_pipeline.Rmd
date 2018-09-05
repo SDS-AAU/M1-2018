@@ -4,8 +4,11 @@ author: "Daniel S. Hain (dsh@business.aau.dk)"
 date: "06/09/2018"
 output:
   html_document:
-    df_print: kable
-    number_sections: yes
+    df_print: paged
+    toc: yes
+  html_notebook:
+    df_print: paged
+    number_sections: no
     toc: yes
 ---
 

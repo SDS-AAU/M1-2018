@@ -1,11 +1,14 @@
 ---
-title: "M1-2: Data Munging"
+title: 'M1-2: Data Munging'
 author: "Daniel S. Hain (dsh@business.aau.dk)"
 date: "06/09/2018"
 output:
   html_document:
-    df_print: kable
-    number_sections: yes
+    df_print: paged
+    toc: yes
+  html_notebook:
+    df_print: paged
+    number_sections: no
     toc: yes
 ---
 
@@ -871,7 +874,7 @@ Well, what about giving it a try on your own? A folder awaits you ready to downl
 2. Do some own exploration of issues and relationships you find interesting.
 3. Maybe add some other WB (or other source) data, to explore even further relationships
 
-HAve fun...
+Have fun...
 
 # Summary & Wrapping up
 

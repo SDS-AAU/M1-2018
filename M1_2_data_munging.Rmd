@@ -579,7 +579,6 @@ Up to now, we just looked at general voting pattern, and then a bit more nuanced
 ```{r}
 descriptions <- readRDS("data/descriptions.rds")
 descriptions %>% head(10) 
-skim(descriptions)
 ```
 
 We find the following variables:
@@ -747,6 +746,27 @@ votes_tidy %>%
 
 The combined use of `group_by()`, `arrange()`, and `slice()` is extremely neath to produce all kind of top-n summaries.
 
+### Mini digression: Regular expressions
+
+In cases when we need to manipulate or search character strings, knwoledge of regular [regular expressions](https://www.rstudio.com/wp-content/uploads/2016/09/RegExCheatsheet.pdf) is extremely useful. We not have time to venture further into that, but lets just assume:
+
+1: We would like to identify rows where a certain string appears....
+
+```{r}
+votes_tidy %>%
+  filter(grepl("Economic", topic)) %>% head(10)
+```
+
+2: or we want to replace a certain character string... eg. because it is just too long... The tidyverse library ``
+
+```{r}
+library(stringr)
+votes_tidy %>%
+  filter(grepl("Economic", topic)) %>% 
+  mutate(topic = str_replace_all(topic, " development", " dev.")) %>% head(10)
+```
+
+
 ## Joining with macroeconomic data
 Ok, so far so good. To complement this exhaustive exercise, we will add some adittional economic data from the WorldBank. Most large economkic data providers such as the Worldbank, UN, OECD, and Eurostat by now offer access to their data via an API, so we can conveniently access their database directly from our laptop at home. Nice, right? How to work with APIs will be, again, a topic of later sessions, so do not expect too many details here.
 
@@ -784,7 +804,6 @@ Interesting, lets get some military related variables out...
 ```{r}
 military_data <- wb(indicator = c("MS.MIL.XPND.GD.ZS", "MS.MIL.XPRT.KD", "MS.MIL.TOTL.TF.ZS"), startdate = 1980, enddate = 2015)
 head(military_data)
-skim(military_data)
 ```
 
 ## Clean the data a bit
@@ -808,7 +827,6 @@ military_cleaned <- military_data %>%
   mutate(MS.MIL.XPRT.KD = log(MS.MIL.XPRT.KD))
 
 head(military_cleaned)
-skim(military_cleaned)
 ```
 
 Lets see who spends most...
@@ -832,7 +850,6 @@ votes_joined2 <- votes_joined %>%
 # We also get rid of countries that are not present in our military data
 votes_joined2 <- votes_joined2 %>%
   semi_join(military_cleaned, by = "country")
-skim(votes_joined2)
 ```
 
 Ok, in the final dataset, the variables `MS.MIL.XPRT.KD` and `MS.MIL.TOTL.TF.ZS` still have just to many missing observations to deal with it (more or almost more missing than complete). so we drop them. 

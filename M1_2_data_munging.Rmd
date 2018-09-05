@@ -365,7 +365,7 @@ votes <- readRDS("data/votes.rds")
 Lets first have a look what's in the dataset.
 
 ```{r}
-head(votes)
+votes  %>% head(10)
 ```
 
 We see that the dataset is with 508,929 observations already somewhat large. We find a set of 4 variables. Doesn't sound so exiting on first glance. Anyhow, lets talk for a moment about the variables we have:
@@ -399,8 +399,7 @@ While there are some more issues you could run into, we in the following go thro
 One step of data cleaning is removing observations (rows) that you're not interested in. In this case, you want to remove "Not present" and "Not a member". Since we are for now not interested in them, lets get rid of them
 
 ```{r}
-votes %>% filter(vote <= 3) %>% head()
-
+votes %>% filter(vote <= 3)  %>% head(10)
 ```
 
 
@@ -409,7 +408,7 @@ The next step of data cleaning is manipulating your variables (columns) to make 
 
 ```{r}
 votes %>%
-  mutate(year = session + 1945)  %>% head()
+  mutate(year = session + 1945)  %>% head(10)
 ```
 
 ### Adding a country column
@@ -423,7 +422,7 @@ For this and similar cases, the R package [`countrycode`](https://github.com/vin
 library(countrycode)
 
 votes  %>%
-  mutate(country = countrycode(ccode, "cown", "country.name"))  %>% head()
+  mutate(country = countrycode(ccode, "cown", "country.name"))  %>% head(10)
 ```
 
 Here,we tell `countrycode` to transfer the Correlates of War Code ("cown") to the easily readable country name ("country.name"). Other transformations such as to ISO2 and ISO3 alphanumerical codes are also possible. Neath, isn't it?
@@ -436,7 +435,7 @@ votes %<>%
   mutate(year = session + 1945,
          country = countrycode(ccode, "cown", "country.name")) %>%
   filter(!is.na(country))
-head(votes)
+votes %>% head(10)
 ```
 
 ## Generating first insights
@@ -461,7 +460,7 @@ year <- votes %>%
   group_by(year) %>%
   summarize(total = n(),
             percent_yes = mean(vote == 1)) 
-head(year, 10)
+year  %>% head(10)
 ```
 
 On first galance, it looks like the overall "agreeableness" seems to increase over time. 
@@ -474,17 +473,17 @@ country <- votes %>%
   group_by(country) %>%
   summarize(total = n(),
             percent_yes = mean(vote == 1))  
-head(country, 10)
+country  %>% head(10)
 ```
 
 Let's inspect this country level voting pattern by looking at the most and least agreable countries by arranging the dataframe.
 
 ```{r}
 country %>%
-  arrange(desc(percent_yes)) %>% head(10)
+  arrange(desc(percent_yes))  %>% head(10)
 
 country %>%
-  arrange(percent_yes) %>% head(10)
+  arrange(percent_yes)  %>% head(10)
 ```
 
 Here we have the top-10 agreable and non-agreable countries (note the use of `slice()`, one of the many advanced `dplyr` verbs). We see that Zanzibar is an absolutely non-agreeing country. Yet, we also see that they only participated in 2 votes. So, is that number reliable and informative? That is a classical example of how we might get misleading results when working with aggregated data without thorroughly investigating it upfront. 
@@ -528,7 +527,7 @@ year_country <- votes %>%
   group_by(year, country) %>%
   summarize(total = n(),
             percent_yes = mean(vote == 1))
-head(year_country, 10)
+year_country  %>% head(10)
 ```
 
 Ok, with this datastructure, we can do some interesting analysis. For example, we can only look at the development of Danish votes by filtering.
@@ -554,7 +553,7 @@ We can following the same idea create a vector of country anmes we want to compa
 countries <- c("United States", "China", "France", "Denmark")
 
 year_country %>%
-  filter(country %in% countries) %>% head(10)
+  filter(country %in% countries)  %>% head(10)
 ```
 
 So,l lets plot these countries. To have them all displayed in one plot, we could either create a `geom_line()` for every subset (would be silly), or define in ggplot's `aes()` that the categorical variable `country` should be mapped with different colors. Therefore, for every country, a sepperate line in a different color will be created.

@@ -4,9 +4,6 @@ author: "Daniel S. Hain (dsh@business.aau.dk)"
 date: "06/09/2018"
 output:
   html_document:
-    df_print: paged
-    toc: yes
-  html_notebook:
     df_print: kable
     number_sections: yes
     toc: yes
@@ -120,7 +117,7 @@ One note: `%>%` pipes do not autometically assign their output to the left-hand 
 1: Initially, assign the output to the original data with `<-`
 2: Initially, use `margrittr`'s `%<>%` command, meaning: Assign and pipe.
 
-```{r, eval = FALSE}
+```{r, eval = FALSE, warning = FALSE}
 x <- x %>%
   filter(numbers > 5)
 
@@ -131,7 +128,7 @@ x %<>%
 In conclusion:
 The pipe basically passes on dataframe between functions in the following way:
 
-```{r, eval = FALSE}
+```{r, eval = FALSE, warning = FALSE}
 x %>% fun(y)
 # Is equivalent to
 fun(x, y)
@@ -157,8 +154,17 @@ These all combine naturally with `group_by()` which allows you to perform any op
 We will explore now a bit with the starwars dataset, which comes together with `dplyr`
 
 ```{r}
-starwars
+head(starwars) # The "startwars" dataset is an integrated dplyr goddie :)
 ```
+
+For a first inspection of new data, I like the corresponding function in the little `skimr` package, which gives a nice brief summary on data, types, and values.
+
+```{r}
+# install.packages("skimr")
+library(skimr)
+skim(starwars)
+```
+
 
 
 #### 1: `filter()`
@@ -190,14 +196,14 @@ It can also be used to deselect columns with a leading `-`
 
 ```{r}
 starwars %>% 
-  select(-birth_year, -skin_color)
+  select(-birth_year, -skin_color) 
 ```
 
 Lastly, many of `dplyr`'s other conditions can be applied to select or deselect columns. More on that later.
 
 ```{r}
 starwars %>% 
-  select(name, ends_with("color"))
+  select(name, ends_with("color")) 
 ```
 
 #### 3: `arrange()`
@@ -328,6 +334,11 @@ Even though that doesnt sound too much, when combining them right, these basic v
 
 ![Cleaning](media/m1_tidy_workflow.png)
 
+```{r, influde = FALSE}
+rm(df1, df2, x)
+```
+
+
 # Case Study: Cleaning up historical data on voting of the United Nations General Assembly
 
 So, after we refreshed the basic grammar of data-manipulation, we will put it to a test in the following example. We will step-by-step explore the power of the basic grammar of data-manipulation.
@@ -340,20 +351,21 @@ Source: Erik Voeten "Data and Analyses of Voting in the UN General Assembly" Rou
 
 
 ## Step 1: Optaining the deta
-Usually, we would now have to download some data online, access it via an API or a local database, or something like that. The full dataset is available at [Harvard's DataVerse](https://dataverse.harvard.edu/dataset.xhtml?persistentId=hdl:1902.1/12379). For a first warm up, we will skip this part, and use the following data I conveniently prepared for you: 
+Usually, we would now have to download some data online, access it via an API or a local database, or something like that. The full dataset is available at [Harvard's DataVerse](https://dataverse.harvard.edu/dataset.xhtml?persistentId=hdl:1902.1/12379).  For a first warm up, we will skip this part, and use the following data I conveniently prepared for you.
+
+A little hint here in case you want to load a `.csv` and stuff the like: The `data.table` package was a really nice function called `fread()` ( stands for "friendly read"), which by now replases mostly `R`'s standard `read.table`, `read.csv()` ect. since it is just faster, automatically recognizes most data format, and codes the variables smarter. However, back to our data. For my own workflow in R, I prefer to save datasets as `.rds` file, which creates a serialized version of the dataset and then saves it with gzip compression. Thatreduces the disk-space of datasets, while they are still read faster than for example a `.csv`.
 
 ```{r}
 votes <- readRDS("data/votes.rds")
 ```
 
-Note: For my own workflow in R, I prefer to save datasets (if not too large) as `.rds` file, which creates a serialized version of the dataset and then saves it with gzip compression. Thatreduces the disk-space of datasets, while they are still read faster than for example a `.csv`.
 
 ## Step 2: First Inspection
 
 Lets first have a look what's in the dataset.
 
 ```{r}
-votes
+head(votes)
 ```
 
 We see that the dataset is with 508,929 observations already somewhat large. We find a set of 4 variables. Doesn't sound so exiting on first glance. Anyhow, lets talk for a moment about the variables we have:
@@ -379,7 +391,7 @@ So, to sum up:
 One step of data cleaning is removing observations (rows) that you're not interested in. In this case, you want to remove "Not present" and "Not a member". Since we are for now not interested in them, lets get rid of them
 
 ```{r}
-votes %>% filter(vote <= 3)
+votes %>% filter(vote <= 3) %>% head()
 
 ```
 
@@ -389,7 +401,7 @@ The next step of data cleaning is manipulating your variables (columns) to make 
 
 ```{r}
 votes %>%
-  mutate(year = session + 1945)
+  mutate(year = session + 1945)  %>% head()
 ```
 
 ### Adding a country column
@@ -403,7 +415,7 @@ For this and similar cases, the R package [`countrycode`](https://github.com/vin
 library(countrycode)
 
 votes  %>%
-  mutate(country = countrycode(ccode, "cown", "country.name"))
+  mutate(country = countrycode(ccode, "cown", "country.name"))  %>% head()
 ```
 
 Here,we tell `countrycode` to transfer the Correlates of War Code ("cown") to the easily readable country name ("country.name"). Other transformations such as to ISO2 and ISO3 alphanumerical codes are also possible. Neath, isn't it?
@@ -416,7 +428,7 @@ votes %<>%
   mutate(year = session + 1945,
          country = countrycode(ccode, "cown", "country.name")) %>%
   filter(!is.na(country))
-votes
+head(votes)
 ```
 
 ## Generating first insights
@@ -427,7 +439,7 @@ In this analysis, we're going to focus on "% of votes that are yes" as a metric 
 ```{r}
 votes %>%
   summarize(total = n(),
-            percent_yes = mean(vote == 1))
+            percent_yes = mean(vote == 1)) 
 ```
 
 Ok, we see that in general, countries tend to be "aggreable". While nice to know, this is not terribly informative. As always, single numbers tell us little, trends, context, and comparison does usually provide more insights. So lets start with putting this number in perspective.
@@ -441,7 +453,7 @@ year <- votes %>%
   group_by(year) %>%
   summarize(total = n(),
             percent_yes = mean(vote == 1)) 
-year
+head(year, 10)
 ```
 
 On first galance, it looks like the overall "agreeableness" seems to increase over time. 
@@ -453,19 +465,18 @@ In the last exercise, you performed a summary of the votes within each year. You
 country <- votes %>%
   group_by(country) %>%
   summarize(total = n(),
-            percent_yes = mean(vote == 1))
+            percent_yes = mean(vote == 1))  
+head(country, 10)
 ```
 
 Let's inspect this country level voting pattern by looking at the most and least agreable countries by arranging the dataframe.
 
 ```{r}
 country %>%
-  arrange(desc(percent_yes)) %>%
-  slice(1:10)
+  arrange(desc(percent_yes)) %>% head(10)
 
 country %>%
-  arrange(percent_yes) %>%
-  slice(1:10)
+  arrange(percent_yes) %>% head(10)
 ```
 
 Here we have the top-10 agreable and non-agreable countries (note the use of `slice()`, one of the many advanced `dplyr` verbs). We see that Zanzibar is an absolutely non-agreeing country. Yet, we also see that they only participated in 2 votes. So, is that number reliable and informative? That is a classical example of how we might get misleading results when working with aggregated data without thorroughly investigating it upfront. 
@@ -487,15 +498,13 @@ ggplot2 can be thought of as a mini-language (domain-specific language) within t
 * **Geometries:** Visual elements you can see in the plot itself, such as bars, lines, and points. They are defined within various `geom_XYZ()` functions.
 Basically, you define a surface grid and then plot something on top. We will talk about all of that in depth in later sessions, for now that's all you need to know to understand the following simple examples.
 
-```{r}
-library(ggplot2)
-```
-
 
 ### Plotting by year
 So, lets graphically explore the development of agreeability over time. The code below is very simple. We pass our data `year` to the `ggplot()` function, which here only contains the basic aestetics `aes()`. In this case, we would like to map the `year` on the `x`, and the value of the `percent_yes` variable on the `y` axis. That defines the plot's surface. Then, we use the `+` to add a geometric element, in this case a line-plot.
 
 ```{r}
+library(ggplot2)
+
 year %>%
   ggplot(aes(x = year, y = percent_yes) ) +
   geom_line() 
@@ -511,7 +520,7 @@ year_country <- votes %>%
   group_by(year, country) %>%
   summarize(total = n(),
             percent_yes = mean(vote == 1))
-year_country
+head(year_country, 10)
 ```
 
 Ok, with this datastructure, we can do some interesting analysis. For example, we can only look at the development of Danish votes by filtering.
@@ -537,7 +546,7 @@ We can following the same idea create a vector of country anmes we want to compa
 countries <- c("United States", "China", "France", "Denmark")
 
 year_country %>%
-  filter(country %in% countries)
+  filter(country %in% countries) %>% head(10)
 ```
 
 So,l lets plot these countries. To have them all displayed in one plot, we could either create a `geom_line()` for every subset (would be silly), or define in ggplot's `aes()` that the categorical variable `country` should be mapped with different colors. Therefore, for every country, a sepperate line in a different color will be created.
@@ -559,7 +568,8 @@ Up to now, we just looked at general voting pattern, and then a bit more nuanced
 
 ```{r}
 descriptions <- readRDS("data/descriptions.rds")
-descriptions
+descriptions %>% head(10) 
+skim(descriptions)
 ```
 
 We find the following variables:
@@ -580,14 +590,14 @@ Furthermore, there are 6 "dummy" (meaning 0 or 1 corresponding to FALSE or TRUE)
 
 Little sidenote: We see that the `date` column here is formatted differntly, in the "YYYY-MM-DD" formaat. To transform it to a "YYYY" (year only) format, we could manipulate the string via **regular expressions** the `tidyverse` package [`stringr`](https://stringr.tidyverse.org) (which we will explore a bit later), or in base-R. However, working with differtent time format is always messy, and the `tidyverse` has a dedicated package for it, [`lubridate`](https://lubridate.tidyverse.org/). So we will use this opportunity for a simple date-transformation exercise:
 
-```{r}
+```{r, warning = FALSE}
 library(lubridate)
 descriptions %<>%
   mutate(year = year(date)) 
-descriptions
+descriptions %>% head(10)
 ```
 
-NEath, isnt it? In similar way, you can easily switch between date formats.
+Neath, isnt it? In similar way, you can easily switch between date formats.
 
 We only have one row per resolution, not as in `votes` one per country vote. Since both dataframes share the `rcid`and `year` variable, we can join on these to augment our votes data with contextual information.
 
@@ -595,7 +605,7 @@ We only have one row per resolution, not as in `votes` one per country vote. Sin
 ```{r}
 votes_joined <- votes %>% select(-ccode) %>%
   inner_join(descriptions %>% select(-date, -session, -unres), by = c("rcid", "year"))
-votes_joined
+votes_joined %>% head(10)
 ```
 
 Here, we perform an `inner_join()`, meaning that it will contain only rows that appear in both dataframes. We do so since we from now on want to look only at votes with contextual information (which are missing in some cases). Note that we deselect unused variables in `description` directly in the join.
@@ -612,7 +622,6 @@ votes_joined %>%
 ```
 
 We could also do the same exercise over all topics together in one plot. 
-
 
 ## Working with tidy data (pivoting, reshaping, or changing between long and wide data formats)
 By now, we worked with the traditional data structure, where every column corresponds to one variable. We also call that a **wide*"** data format. This is in most cases the most efficient and prefered way to keep your data. However, there are some cases, where another dataformat would be more convenient.
@@ -637,9 +646,9 @@ For our task, we will now reshape our dataframe from wide to long (tidy), theref
 ```{r}
 library(tidyr)
 votes_tidy <- votes_joined %>%
-  gather(topic, has_topic, me:ec) %>%
+  gather(key = topic, value = has_topic, me:ec) %>%
   filter(has_topic == 1)
-votes_tidy
+votes_tidy %>% head(10)
 ```
 
 ### Recoding the topics
@@ -663,7 +672,7 @@ In previous exercises, you summarized the votes dataset by country, by year, and
 votes_tidy %>%
   group_by(country, year, topic) %>%
   summarize(total = n(), percent_yes = mean(vote == 1)) %>%
-  ungroup()
+  ungroup() %>% head(10)
 ```
 
 ### Visualizing trends in topics for one country
@@ -699,8 +708,6 @@ Ok, byt that's enough about visualization for now, I do not want to spoiler too 
 
 Another intersting thing we could do now is to find the most aggreable topic per country, emaning the one every country is most inclined to voe for "yes". As you will see, that is easily done in tidy data with combining the well known verbs. You're getting a hang on it, right?
 
-
-
 ```{r}
 votes_tidy %>%
   group_by(country, topic) %>%
@@ -711,7 +718,7 @@ votes_tidy %>%
   slice(1) %>%
   ungroup() %>%
   filter(total > 50) %>%
-  arrange(desc(percent_yes))
+  arrange(desc(percent_yes)) %>% head(10)
 ```
 
 Similarly, we could look at the top-3 countries in favor of every topic.
@@ -735,8 +742,15 @@ Ok, so far so good. To complement this exhaustive exercise, we will add some adi
 
 However, the large R community has made substantial effort to ease the access  to govermental data, resulting in many packes serving as wrappers for the corresponding APIs. That means, most of these databases can nowadays be accessed via high-level R commands, without having to bother with the programming language of the API. Moste noteworthy, the [R openGov](http://ropengov.github.io/) initiative. For this exercise, we will use the [`wbstats`](https://github.com/GIST-ORNL/wbstats) package, which lets you easily search, access, and download tfrom the WorldBank data catalogue.
 
+Lets check it out!
+
+```{r}
+
+```
+
 
 
 
 
 # Summary & Wrapping up
+

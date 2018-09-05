@@ -51,7 +51,14 @@ First things first. Without data, no science.
 * Retrieving Unstructured Data: text, videos, audio files, documents
 * Distributed Storage (Advanced): Hadoops, Spark/Flink
 * Python Packages
-    * XXX
+    * Pandas (geopandas if working with GIS data)
+    * Requests (working with APIs)
+    * Beautiful Soup (HTML parsing)
+    * Json/Simplejson (parsing JSON data)
+    * Pymongo (MongoDB interface)
+    * Sqlite (Sqlite in Python, Pandas can access SQL too)
+    * H5Py and Pytables (Working with HDF5 - big nummerical data)
+    * Pyspark (in case you venture into Spark and distributed computing)
 * R packages
     * Dplyr
     * API interfaces (eg. eurostat, rcrunchbase)
@@ -72,7 +79,10 @@ So, we got all our data together. Yet, in most cases the really hard part begins
 ### Skills Required:
 * Scripting language and corresponding packages: Python, R(dplyr)
 * Python Packages
-    * XXX
+    * Pandas
+    * sklearn (can be used for imputation)
+    * fancyimpute (as the name suggests - implements various matrix completion algos)
+    * missingno (visualize missing/messy data)
 * R packages
     * Dplyr (as always, for general replacement, mutation, grouping, aggregation, joins)
     * anomalize: Tidy anomaly detection
@@ -88,10 +98,10 @@ So, we got all our data together. Yet, in most cases the really hard part begins
 
 ### Skills Required:
 * Python Packages
-    * Numpy
-    * Matplotlib
     * Pandas
-    * Scipy
+    * Numpy (for more complex matrix algebra & co.)
+    * Networkx (if your data is relational M2)
+    * Seaborn (Statistical plotting built on top of the incomprehensible matplotlib)
 * R Packages
     * dplyr
     * GGplot2 (Grammar of Graphics implementation in R)
@@ -115,7 +125,8 @@ So, we got all our data together. Yet, in most cases the really hard part begins
 * Machine Learning: Supervised/Unsupervised algorithms
 * Evaluation methods
 * ML libraries for Python
-    * Sci-kit Learn
+    * Scikit Learn (all possible and impossible ML algorithms, preprocessing and more)
+    * Sklearn-pandas (bridge between Scikit and Pandas dataframes)
 * ML libraries for R
     * Caret
 * Linear algebra & Multivariate Calculus
@@ -131,17 +142,18 @@ So, we got all our data together. Yet, in most cases the really hard part begins
 ### Skills Required:
 * Business Domain Knowledge
 * Data Visualization Tools: 
-     * Tablaeu, MS PowerBI
+     * Tablaeu, MS PowerBI (AAU license), Google's Datastudio (free)
 * Python DataViz Packages
-     * Matplotlib
-     * Seaborn
+     * Seaborn (and Matplotlib)
+     * ipyleaflet (interactive maps)
+     * Bokeh (advanced interactive charts)
 * R DataViz Packages
      * GGplot2
      * Igraph (for network viz)
      * Shiny (for interactive and online viz)
      * Leaflet (for interactive maps)
 * Other stuff
-     * D3.JS, JavaScript general
+     * Gephi, D3.JS, JavaScript general
 * Communication: Presenting/Speaking & Reporting/Writing
 
 

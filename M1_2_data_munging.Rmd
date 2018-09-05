@@ -3,12 +3,12 @@ title: 'M1-2: Data Munging'
 author: "Daniel S. Hain (dsh@business.aau.dk)"
 date: "06/09/2018"
 output:
-  html_document:
-    df_print: paged
-    toc: yes
   html_notebook:
     df_print: paged
     number_sections: no
+    toc: yes
+  html_document:
+    df_print: paged
     toc: yes
 ---
 
@@ -766,6 +766,7 @@ votes_tidy %>%
   mutate(topic = str_replace_all(topic, " development", " dev.")) %>% head(10)
 ```
 
+Regular expressions are a bit of a mess to learn, but extremely powerful. In case you need it, give it a shot!
 
 ## Joining with macroeconomic data
 Ok, so far so good. To complement this exhaustive exercise, we will add some adittional economic data from the WorldBank. Most large economkic data providers such as the Worldbank, UN, OECD, and Eurostat by now offer access to their data via an API, so we can conveniently access their database directly from our laptop at home. Nice, right? How to work with APIs will be, again, a topic of later sessions, so do not expect too many details here.
@@ -893,5 +894,4 @@ Well, what about giving it a try on your own? A folder awaits you ready to downl
 
 Have fun...
 
-# Summary & Wrapping up
 

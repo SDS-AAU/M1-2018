@@ -35,6 +35,7 @@ detachAllPackages(); rm(detachAllPackages)
 ### Load packages  Standard
 library(knitr) # For display of the markdown
 library(tidyverse) # Collection of all the good stuff like dplyr, ggplot2 ect.
+library(magrittr)
 library(data.table) # Good format to work with large datasets
 library(skimr) # Nice descriptives
 
@@ -308,25 +309,61 @@ fviz_pca_biplot(res.pca,
                 ggtheme = theme_gray()) 
 ```
 
-### Note: VEctorization and distances
+### Note: Vectorization and distances
 
+Just a sidenote (which might become more important in later lectures): The components delivered by a PCA can also be used to create distance or similarity measures between two observations. You might need to refresh a bit of your vector algebra for the different ways to crate distance measures between vectors. Here, we just will use the simple "euclidian" distance in n-dimensional space. This can be done with the base-R `dist()` function. However, the `FactoMineR` has a function `get_dist()` which I prefer, since it includes a couple of other useful distance measurs.
+
+```{r}
 dist.res <- get_dist(res.pca$ind$coord, method = "euclidean")
 fviz_dist(dist.res)
+```
 
+The resulting distance object can be tansformed in a distance matrix. We will also add names for the matrix dimensions.
+
+
+```{r}
 dist <- as.matrix(dist.res)
-rownames(dist) <- data$V1
-colnames(dist) <- data$V1
-  
+rownames(dist) <- data %>% pull(place)
+colnames(dist) <- data %>% pull(place)
+```
+
+This matrix we could, for example, use to create a distance metwork (as we will do in M2). When continuing with "tidy" data, we would like to transform it in what we in network-jargon call a "edgelist". That can be most easily done with the `reshape2` package. Notice: This is a very convenient but not the most efficient way to create distance edgelists. In case we have a very large number of entities, you might want to learn how to deal with sarse-matrices. More on that again in M2.
+
+```{r}
 library(reshape2)
 dist_el <- melt(dist) 
 
 dist_el %<>%
-  filter(Var1 != Var2)
+  filter(Var1 != Var2) %>%
+  as_tibble()
+
+head(dist_el)  
+```
+
+Ok, lets just take a brief look which cities are most similar, and most distant in terms of their characteristics.
+
+```{r}
+dist_el %>%
+  arrange(value) %>%
+  head(10)
+
+dist_el %>%
+  arrange(desc(value)) %>%
+  head(10)
+```
+
+Sidenote: Here, we created the distance based on al components equally. Instead, one could weight the distance by the component's variance explained, that the most explanatory component gets higher weights. That would be a nice exercise. 
+
+Such distance edgelists can be extremely informative. However, we will for not not use it anymore in the analysis to come, so lets get rid of the big objects.
+
+```{r}
+rm(dist, dist_el, dist.res)
+```
+
 
 # Clustering
 
 ## Introduction
-
 
 ### Types of Clustering
 Clustering can be broadly divided into two subgroups:
@@ -513,6 +550,25 @@ Stability of results: k-means requires a random step at its initialization that 
 * **Number of Clusters:* While you can use elbow plots, Silhouette plot etc. to figure the right number of clusters in k-means, hierarchical too can use all of those but with the added benefit of leveraging the dendrogram for the same.
 * **Computation Complexity:* K-means is less computationally expensive than hierarchical clustering and can be run on large datasets within a reasonable time frame, which is the main reason k-means is more popular.
 
+
 # Your turn!
-So, why not have some fun on your own now? 
+So, why not have some fun on your own now? try to use what you learned up to now in the following extercise. [---> HERE <---](https://github.com/SDS-AAU/M1-2018/blob/master/data/vsm13.csv) you will find a dataset on Gert Hofstede's ["6-D model of national culture""](https://geerthofstede.com/culture-geert-hofstede-gert-jan-hofstede/6d-model-of-national-culture/). This popular measures of country-level culture in (by now) 6 dimensions became very popular in sociology, economics, and management science to explain cross-cultural interaction as well as frictions. a exhaustive documentation of the 2013 dataset can be found [here](https://geerthofstede.com/wp-content/uploads/2016/07/Manual-VSM-2013.pdf). It contains the following variables.
+
+** **`pdi:`**  The power distance index is defined as “the extent to which the less powerful members of organizations and institutions (like the family) accept and expect that power is distributed unequally.” In this dimension, inequality and power is perceived from the followers, or the lower level. A higher degree of the Index indicates that hierarchy is clearly established and executed in society, without doubt or reason. A lower degree of the Index signifies that people question authority and attempt to distribute power.
+** **`idv:`**  This index explores the “degree to which people in a society are integrated into groups.” Individualistic societies have loose ties that often only relates an individual to his/her immediate family. They emphasize the “I” versus the “we.” Its counterpart, collectivism, describes a society in which tightly-integrated relationships tie extended families and others into in-groups. These in-groups are laced with undoubted loyalty and support each other when a conflict arises with another in-group.
+** **`mas:`**  In this dimension, masculinity is defined as “a preference in society for achievement, heroism, assertiveness and material rewards for success.” Its counterpart represents “a preference for cooperation, modesty, caring for the weak and quality of life.” Women in the respective societies tend to display different values. In feminine societies, they share modest and caring views equally with men. In more masculine societies, women are somewhat assertive and competitive, but notably less than men. In other words, they still recognize a gap between male and female values. This dimension is frequently viewed as taboo in highly masculine societies.
+** **`uai:`**  The uncertainty avoidance index is defined as “a society's tolerance for ambiguity,” in which people embrace or avert an event of something unexpected, unknown, or away from the status quo. Societies that score a high degree in this index opt for stiff codes of behavior, guidelines, laws, and generally rely on absolute truth, or the belief that one lone truth dictates everything and people know what it is. A lower degree in this index shows more acceptance of differing thoughts or ideas. Society tends to impose fewer regulations, ambiguity is more accustomed to, and the environment is more free-flowing.
+** **`ltowvs:`** This dimension associates the connection of the past with the current and future actions/challenges. A lower degree of this index (short-term) indicates that traditions are honored and kept, while steadfastness is valued. Societies with a high degree in this index (long-term) views adaptation and circumstantial, pragmatic problem-solving as a necessity. A poor country that is short-term oriented usually has little to no economic development, while long-term oriented countries continue to develop to a point. 
+** **`ivr:`**  This dimension is essentially a measure of happiness; whether or not simple joys are fulfilled. Indulgence is defined as “a society that allows relatively free gratification of basic and natural human desires related to enjoying life and having fun.” Its counterpart is defined as “a society that controls gratification of needs and regulates it by means of strict social norms.” Indulgent societies believe themselves to be in control of their own life and emotions; restrained societies believe other factors dictate their life and emotions
+
+
+Ok, looks interesting. Let's do the fololwing:
+
+0. The data is not perfect. So some small upfront-munging is necessary.
+1. Gert Hofstede claims this dimensions to emasure orthogonal features of culture. That raises the question if they reasy measure different constructs. To find out, lets execute a PCA on them. How do the dimensions load? And how do countries score? Illustrate and visualize the results.
+2. Can we form meaningful "cultural clusters" among countries?
+3. Let's create a meaningful measure for "cultural distance" between countries. What do we see? Interpret.
+4. (Advanced) Does bilateral "cultural distance" or the assignment to a "cultural cluster" help us to explain other interaction between countries we might be interested in, such as trade, migration etc.? Here you will need some skills from M1-1 & 2.
+
+Have fun!
 

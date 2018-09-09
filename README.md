@@ -11,6 +11,7 @@
 ## M1 - 3/4
 
 [EDA and Visualization part 1 - US policing](http://nbviewer.jupyter.org/github/SDS-AAU/M1-2018/blob/master/M1_S3-4%20%28part%20one%29.ipynb)
+
 [The same notebook but now with all outputs](http://nbviewer.jupyter.org/github/SDS-AAU/M1-2018/blob/master/M1_S3-4%20%28part%20one%29_with%20outputs.ipynb)
 
 

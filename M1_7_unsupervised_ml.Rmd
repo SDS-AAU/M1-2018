@@ -1,0 +1,518 @@
+---
+title: 'M1-7: Unsupervised Machine Learning'
+author: "Daniel S. Hain (dsh@business.aau.dk)"
+date: "12/09/2018"
+output:
+  html_document:
+    df_print: paged
+    toc: yes
+  html_notebook:
+    df_print: paged
+    number_sections: no
+    toc: yes
+---
+
+```{r setup, include = FALSE}
+### Generic preamble
+Sys.setenv(LANG = "en")
+
+### Install packages if necessary
+list.of.packages <- c("devtools", "rstudioapi", "knitr", "data.table", "skimr",  "ggridges", "recipes")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
+rm(list.of.packages)
+
+### Clean Workspace (I like to start clean)
+rm(list=ls()); graphics.off() # get rid of everything in the workspace
+detachAllPackages <- function() { # Also, detach packages to avoid functions masked by others
+  basic.packages <- c("package:stats","package:graphics","package:grDevices","package:utils","package:datasets","package:methods","package:base")
+  package.list <- search()[ifelse(unlist(gregexpr("package:",search()))==1,TRUE,FALSE)]
+  package.list <- setdiff(package.list,basic.packages)
+  if (length(package.list)>0)  for (package in package.list) detach(package, character.only=TRUE)
+}
+detachAllPackages(); rm(detachAllPackages)
+
+### Load packages  Standard
+library(knitr) # For display of the markdown
+library(tidyverse) # Collection of all the good stuff like dplyr, ggplot2 ect.
+library(data.table) # Good format to work with large datasets
+library(skimr) # Nice descriptives
+
+### pimp up memory (to save on disk if necessary, only works on windows)
+#memory.limit(10 * 10^10)
+
+### Knitr options
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+```
+
+# Machine Learning: Some clarifications
+
+## General
+
+## Supervised vs. Unsupervised ML
+
+### Supervised ML
+
+### Unsupervised ML
+
+Finding homogenous subgroups within larger group
+
+* Clustering
+
+Finding pa!erns in the features of the data
+
+* Dimensionality reduction
+
+
+# Dimensionality Reduction Techniques
+
+## Introduction
+
+Dimensionality reduction techniques are foremost useful to (you might see it coming) reduce the dimensionality of our data. So, what does that mean? And why should we want to do that?
+
+Dimensions here is a synonym for variables, so what we want to really do is have less variables. To do that, we have to find ways to express the same amount of information with fewer, but more information rich variables. This is particularly useful to:
+
+* Find patterns in the **features** of the data
+* Visualization of **high-dimensional** data
+* Pre-processing before supervised learning
+
+### Overview over Techniques
+
+The type of analysis to be performed depends on the data set formats and structures. The most commonly used DR techniques are:
+
+* **Principal Component Analysis (PCA):** Is used to summarize the information contained in a continuous (i.e, quantitative) multivariate data by reducing the dimensionality of the data without loosing important information.
+* **Correspondence Analysis (CA):** An extension of the principal component analysis suited to analyse a large contingency table formed by two qualitative variables (or categorical data).
+* **Multiple Correspondence Analysis (MCA):** An adaptation of CA to a data table containing more than two categorical variables.
+* **Multiple Factor Analysis (MFA):** Dedicated to datasets where variables are organized into groups (qualitative and/or quantitative variables).
+* **Hierarchical Multiple Factor Analysis (HMFA):** An extension of MFA in a situation where the data are organized into a hierarchical structure.
+* **Factor Analysis of Mixed Data (FAMD):** A particular case of the MFA, dedicated to analyze a data set containing both quantitative and qualitative variables.
+
+![](media/m7_dim_tech.png)
+
+### Principal Component Analysis (PCA)
+
+#### General
+
+● A popular method is principal component analysis (PCA)
+● Three goals when finding lower dimensional
+representation of features:
+● Find linear combination of variables to create
+principal components
+● Maintain most variance in the data
+● Principal components are uncorrelated (i.e.
+orthogonal to each other)
+
+#### The math and intuition behind it
+The mathematics underlying it are somewhat complex, so I won't go into too much detail, but the basics of PCA are as follows: you take a dataset with many variables, and you simplify that dataset by turning your original variables into a smaller number of "Principal Components".
+
+![](media/m7_PCA1.png){width=250px}
+
+But what are these exactly? Principal Components are the underlying structure in the data. They are the directions where there is the most variance, the directions where the data is most spread out. This means that we try to find the straight line that best spreads the data out when it is projected along it. This is the first principal component, the straight line that shows the most substantial variance in the data.
+
+![](media/m7_PCA2.png){width=250px}
+
+Where many variables correlate with one another, they will all contribute strongly to the same principal component. Each principal component sums up a certain percentage of the total variation in the dataset. Where your initial variables are strongly correlated with one another, you will be able to approximate most of the complexity in your dataset with just a few principal components. Usually, the first principal component captures the main similarity in your data, the second the main difference.
+
+![](media/m7_PCA3.png){width=250px}
+
+These principal components can be computed via **Eigenvalues** and **Eigenvectors**. Just like many things in life, eigenvectors, and eigenvalues come in pairs: every eigenvector has a corresponding eigenvalue. Simply put, an eigenvector is a direction, such as "vertical" or "45 degrees", while an eigenvalue is a number telling you how much variance there is in the data in that direction. The eigenvector with the highest eigenvalue is, therefore, the first principal component. The number of eigenvalues and eigenvectors that exits is equal to the number of dimensions the data set has. Consequently, we can reframe a dataset in terms of these eigenvectors and eigenvalues without changing the underlying information. Note that reframing a dataset regarding a set of eigenvalues and eigenvectors does not entail changing the data itself, you’re just looking at it from a different angle, which should represent the data better.
+
+## Case study: (Digital) Nomad Life
+
+### **O** & **S** & **E**: Load, clean and inspect
+
+Allright, lets load some data. Here, we will draw from some own work, where we explore the life of digital nomads. The paper is not written, but the preliminary work is summarized in [this presentation](https://aaudk-my.sharepoint.com/:b:/g/personal/dsh_id_aau_dk/ESeuvplEytZCuNBhKGmA4U8BOGpfbGIbilqTGdgQLA4a6A?e=UGRnvR). You probably already know the data from [NomadList](https://nomadlist.com/). Here, we look at the 2017 crawl of city data, which compiles the digital nomads ranking of cities according to a couple of dimensions. Lets take a look.
+
+Roman's web-crawld ata is always a bit messy, so we do some little cosmetics upfront.
+
+
+```{r}
+data <- fread("data/nomad_cities.csv",
+              sep="\t",
+              dec=".",
+              na.strings=c("NA", "DotMap(__next__=DotMap())", "DotMap()") )
+
+data %<>%
+  select(-V1, -nomadScore) %>%
+  select(place, nomad_score, longitude, latitude, everything()) %>%
+  mutate(racism = if_else(racism > 1, 1, racism))
+```
+
+Lets take a look:
+
+```{r}
+head(data)
+glimpse(data)
+skim(data)
+```
+
+Quite a set of interesting features, which are all numerically coded. Lets select the one we want to analyze and organize them a bit. Since it's a lot of variables, I afterwards select only a subset on which we do some graphical exploration.
+
+```{r}
+# Variables for analysis
+vars <- c("cost_nomad", "cost_coworking", "cost_expat", "coffee_in_cafe", "cost_beer", # costs
+          "places_to_work", "free_wifi_available", "internet_speed", # work
+          "freedom_score", "peace_score", "safety", "fragile_states_index", "press_freedom_index", # safety & freedom
+          "female_friendly", "lgbt_friendly", "friendly_to_foreigners", "racism", # friendly
+          "leisure","life_score","nightlife","weed" # fun 
+          )
+
+# Variables for descriptives
+vars.desc <- c("nomad_score", "cost_nomad", "places_to_work", "freedom_score", "friendly_to_foreigners", "life_score")
+
+```
+
+
+Ok, time for some exploration. Here I will introduce the `GGally` package, a wrapper for `ggplot2` which has some functions for very nice visual summaries in matrix form.
+
+```{r}
+library(GGally)
+```
+
+First, lets look at a classical correlation matrix.
+
+```{r}
+ggcorr(data[vars], label = TRUE, label_size = 3, label_round = 2, label_alpha = TRUE)
+```
+
+Even cooler, the `ggpairs` function creates you a scatterplot matrix plus all variable distributions and correlations. Before I used the package `PerformanceAnalytics` for that, but I like the ggplot-style more.
+
+```{r}
+ggpairs(data[,vars.desc], 
+        aes(alpha = 0.3), 
+        ggtheme = theme_gray())  
+```
+
+
+#### Digression: Missing value imputation
+To remind you, component scores cannot be computed on missing features. So lets impute them. It's a good point to introduce you to some neath imputation techniques. First, the package `VIM` has some nice imputation functions, but also some nice diagnistic plots.
+
+```{r, echo = FALSE}
+library(VIM)
+```
+
+
+```{r}
+marginmatrix(data[,vars.desc]) # Note: Cool feature, but matrix becones just too big for many features
+
+aggr(data[,vars], 
+     col = c('navyblue','red'), 
+     numbers = TRUE, 
+     sortVars = TRUE, 
+     labels = names(data[,vars]), 
+     cex.axis = 0.5, 
+     gap = 0.5, 
+     ylab=c("Histogram of missing data","Pattern"))
+```
+
+For the real imputation, I prefer the `mice` package, which works with a neural network "under the hood". Here, every feature is sequentially predicted by all other existing features in an iterative process. Since this process involves some stochachics, I define a seed upfront for reproducible results.
+
+
+```{r, echo = FALSE}
+set.seed(1337)
+
+library(mice)
+data.mice <- mice(data = data[,vars], m = 1, maxit = 100, seed = 1337) 
+
+```
+
+Let's look at the distribution of the imputed vs. the existing features.
+
+```{r}
+densityplot(data.mice)
+```
+
+I would say, good enough. Lets take them!
+
+```{r}
+var.imp <- c("freedom_score", "peace_score", "fragile_states_index", "press_freedom_index")
+
+data.imp <- complete(data.mice, action = 1)
+data[,var.imp] <- data.imp[,var.imp]
+rm(data.mice, data.imp, var.imp)
+```
+
+
+
+### Dimensionality reduction
+
+To execute the PCA, we'll here use the [`FactoMineR`](http://factominer.free.fr/) package to compute PCA, and  [`factoextra`](https://github.com/kassambara/factoextra) for extracting and visualizing the results. `FactoMineR` is a great and my favorite package for computing principal component methods in R. It’s very easy to use and very well documented. There are other alternatives around, but I since quite some time find it to be the most powerful and convenient one. `factoextra` is just a convenient `ggplot` wrapper that easily produces nice and informative diagnistic plots for a variety of DR and clustering techniques.
+
+```{r}
+library(FactoMineR)
+library(factoextra)
+```
+
+Lets do that. Notice the `scale.unit = TRUE` argument, which you should ALWAYS use. Afterwards, we take a look at the resulting list object.
+
+```{r}
+res.pca <- PCA(data[,vars], scale.unit = TRUE, graph = FALSE)
+glimpse(res.pca)
+```
+
+Ok, lets see look at the "screeplot", a diagnostic visualization that displays the variance explained by every component. We here use the `factoextra` package, like for all following visualizations with the `fviz_` prefix. Notice that the output in every case is an `ggplot2` object, which could be complemented with further layers.
+
+```{r}
+fviz_screeplot(res.pca, 
+               addlabels = TRUE, 
+               ncp = 10, 
+               ggtheme = theme_gray())
+```
+
+As expected, we see that the first component already captures a main share of the variance. Let's look at the corresponding eigenvalues.
+
+```{r}
+res.pca$eig
+```
+
+For feature selection, our rule-of-thumb is to only include components with an eigenvalue > 1, meaning that we in this case would have reduced our data to 4 dimensions. Lets project them onto 2-dimensional space and take a look at the vector of our features.
+
+
+```{r}
+fviz_pca_var(res.pca, 
+             alpha.var = "cos2",
+             col.var = "contrib",
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+             repel = TRUE,
+             ggtheme = theme_gray()) 
+```
+
+We see that they tend to cluster in 3 groups:
+
+1. Fun, friendlyness, work (upper right)
+2. Costs (lower right)
+3. Safety and stability (left)
+
+Lets look at the numeric values.
+
+```{r}
+get_pca_var(res.pca)
+res.pca$var$coord
+```
+
+The results-object also contains the observations loading on the components.
+
+```{r}
+get_pca_var(res.pca)
+head(res.pca$ind$coord) 
+```
+
+Let's visualize our observations and the variable-loading together in the space of the first 2 components.
+
+```{r}
+fviz_pca_biplot(res.pca,
+                alpha.ind = "cos2",
+                col.ind = "contrib",
+                gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+                geom = "point", 
+                ggtheme = theme_gray()) 
+```
+
+### Note: VEctorization and distances
+
+dist.res <- get_dist(res.pca$ind$coord, method = "euclidean")
+fviz_dist(dist.res)
+
+dist <- as.matrix(dist.res)
+rownames(dist) <- data$V1
+colnames(dist) <- data$V1
+  
+library(reshape2)
+dist_el <- melt(dist) 
+
+dist_el %<>%
+  filter(Var1 != Var2)
+
+# Clustering
+
+## Introduction
+
+
+### Types of Clustering
+Clustering can be broadly divided into two subgroups:
+
+1. Hard clustering: in hard clustering, each data object or point either belongs to a cluster completely or not. For example in the Uber dataset, each location belongs to either one borough or the other.
+2. Soft clustering: in soft clustering, a data point can belong to more than one cluster with some probability or likelihood value. For example, you could identify some locations as the border points belonging to two or more boroughs.
+
+Clustering algorithms can be categorized based on their cluster model, that is based on how they form clusters or groups. This tutorial only highlights some of the prominent clustering algorithms.
+
+* **Connectivity-based clustering:** the main idea behind this clustering is that data points that are closer in the data space are more related (similar) than to data points farther away. The clusters are formed by connecting data points according to their distance. At different distances, different clusters will form and can be represented using a dendrogram, which gives away why they are also commonly called "hierarchical clustering". These methods do not produce a unique partitioning of the dataset, rather a hierarchy from which the user still needs to choose appropriate clusters by choosing the level where they want to cluster. They are also not very robust towards outliers, which might show up as additional clusters or even cause other clusters to merge.
+
+* **Centroid-based clustering:** in this type of clustering, clusters are represented by a central vector or a centroid. This centroid might not necessarily be a member of the dataset. This is an iterative clustering algorithms in which the notion of similarity is derived by how close a data point is to the centroid of the cluster. k-means is a centroid based clustering, and will you see this topic more in detail later on in the tutorial.
+
+* **Distribution-based clustering:** this clustering is very closely related to statistics: distributional modeling. Clustering is based on the notion of how probable is it for a data point to belong to a certain distribution, such as the Gaussian distribution, for example. Data points in a cluster belong to the same distribution. These models have a strong theoritical foundation, however they often suffer from overfitting. Gaussian mixture models, using the expectation-maximization algorithm is a famous distribution based clustering method.
+
+* **Density-based methods:^^ search the data space for areas of varied density of data points. Clusters are defined as areas of higher density within the data space compared to other regions. Data points in the sparse areas are usually considered to be noise and/or border points. The drawback with these methods is that they expect some kind of density guide or parameters to detect cluster borders. DBSCAN and OPTICS are some prominent density based clustering.
+
+So, what is the best to use? Hard to say. Clustering is an subjective task and there can be more than one correct clustering algorithm. Every algorithm follows a different set of rules for defining the 'similarity' among data points. The most appropriate clustering algorithm for a particular problem often needs to be chosen experimentally, unless there is a mathematical reason to prefer one clustering algorithm over another. An algorithm might work well on a particular dataset but fail for a different kind of dataset. Since there is most times no wrong or right, the clustering that delivers the most useful results is the way to go.
+
+## K-means Clustering
+K-means clustering is the most commonly used unsupervised machine learning algorithm for dividing a given dataset into `k` clusters, which must be provided by the user. The basic idea behind k-means clustering consists of defining clusters so that the total intra-cluster variation (known as total within-cluster variation) is minimized. There are several k-means algorithms available. However, the standard algorithm defines the total within-cluster variation as the sum of squared distances Euclidean distances between items and the corresponding centroid. Its an iterative process containing the following steps
+
+1. Specify k - the number of clusters to be created.
+2. Select randomly k objects from the dataset as the initial cluster centers.
+3. Assign each observation to their closest centroid, based on the Euclidean distance between the object and the centroid.
+4. For each of the k clusters recompute the cluster centroid by calculating the new mean value of all the data points in the cluster.
+5. Iteratively minimize the total within sum of square. Repeat Step 3 and Step 4, until the centroids do not change or the maximum number of iterations is reached (R uses 10 as the default value for the maximum number of iterations).
+
+So, lets do that. As already mentioned, we have to upfront choose our `k`. However, there exists some guidance, for example the highest gain in "total within sum of sqares" (fast to calculate), as well as the "gap statistics" (hard to calculate, takes time).
+
+```{r}
+fviz_nbclust(scale(data[,vars]), 
+             kmeans, 
+             method = "wss")  
+
+```
+
+Ok,w e here settle for 3 (executive desicion). Before we start, something weird upfront. The function takes the observation names from the rownames (which nobody uses anymore, and are depreciated by `dplyr`). So, remeber to define them just straight before you cluster, otherwise the next `dplyr` pipe will delete them again.
+
+```{r}
+rownames(data) <- data %>% pull(place)
+```
+
+Oflets run the algorythm.
+
+```{r}
+km <- kmeans(scale(data[,vars]), centers = 3, nstart = 20)  
+glimpse(km)
+```
+
+Again, lets visualize it. To have a meaningful way for 2d visualization, we again project the observations on the space of the first 2 components.
+
+```{r}
+fviz_cluster(km, data = data[,vars],
+             ggtheme = theme_gray())  
+```
+
+Ok, we got 3 clusters. Let's look what's in them.
+
+```{r}
+data %>%
+  bind_cols(cluster = km$cluster) %>%
+  select(vars.desc, cluster) %>%
+  group_by(cluster) %>%
+  mutate(n = n()) %>%
+  summarise_all(funs(mean))
+```
+
+
+## Hirarchical Clustering
+
+### Introduction
+The key operation in hierarchical agglomerative clustering is to repeatedly combine the two nearest clusters into a larger cluster. There are three key questions that need to be answered first:
+
+* How do you represent a cluster of more than one point?
+* How do you determine the "nearness" of clusters?
+* When do you stop combining clusters?
+* Hopefully by the end this tutorial you will be able to answer all of these questions. Before applying hierarchical clustering let's have a look at its working:
+
+1. It starts by calculating the distance between every pair of observation points and store it in a distance matrix.
+2. It then puts every point in its own cluster.
+3. Then it starts merging the closest pairs of points based on the distances from the distance matrix and as a result the amount of clusters goes down by 1.
+4. Then it recomputes the distance between the new cluster and the old ones and stores them in a new distance matrix.
+5. Lastly it repeats steps 2 and 3 until all the clusters are merged into one single cluster.
+
+There are several ways to measure the distance between clusters in order to decide the rules for clustering, and they are often called Linkage Methods. Some of the common linkage methods are:
+
+* **Complete-linkage:** calculates the maximum distance between clusters before merging.
+* **Single-linkage:** calculates the minimum distance between the clusters before merging. This linkage may be used to detect high values in your dataset which may be outliers as they will be merged at the end.
+* **Average-linkage:** calculates the average distance between clusters before merging.
+* **Centroid-linkage:** finds centroid of cluster 1 and centroid of cluster 2, and then calculates the distance between the two before merging.
+
+The choice of linkage method entirely depends on you and there is no hard and fast method that will always give you good results. Different linkage methods lead to different clusters.
+
+### Performing a hirarchical clustering
+However, let's get it started and perform a cluster. We here use the `hcut` function, which includes most of the abovementioned mapproaches as options.
+
+```{r}
+hc <- hcut(data[,vars], hc_func = "hclust", k = 3, stand = TRUE)
+```
+
+In hierarchical clustering, you categorize the objects into a hierarchy similar to a tree-like diagram which is called a dendrogram. The distance of split or merge (called height) is shown on the y-axis of the dendrogram below.
+
+```{r}
+fviz_dend(hc, 
+          rect = TRUE, 
+          cex = 0.5)
+```
+
+**Notice** how the dendrogram is built and every data point finally merges into a single cluster with the height(distance) shown on the y-axis.
+
+Let's inspect what's in the clusters.
+
+```{r}
+data %>%
+  bind_cols(cluster = hc$cluster) %>%
+  select(vars.desc, cluster) %>%
+  group_by(cluster) %>%
+  mutate(n = n()) %>%
+  summarise_all(funs(mean))
+```
+
+And again visualize them:
+
+```{r}
+fviz_cluster(hc, data = data[,vars],
+             ggtheme = theme_gray())  
+```
+
+Looks very similar, even though the middle cluster is a bit more sqeezed in between now. We can also use our scatterplot diagnostics again, and color the observations by their cluster assignment.
+
+```{r}
+ggpairs(data[,vars.desc], 
+        lower = list(continuous = "smooth"), 
+        aes(colour = as.factor(hc$cluster), alpha = 0.4),
+        progress = FALSE,
+        ggtheme = theme_gray() )
+```
+
+
+
+
+data %<>%
+  mutate(popular = ifelse(nomad_score > mean(nomad_score), TRUE, FALSE))
+
+fviz_pca_biplot(res.pca,
+                alpha.ind = "cos2",
+                geom = "point", 
+                habillage = factor(data$popular), 
+                addEllipses = TRUE,
+                ggtheme = theme_gray()) 
+
+
+### Hirarchical Clustering based in PCA
+You might already have wondered: "COuld one combine a PCA with clustering techniques"? The answer is: "Yes!". In practice, that actually works very fine, and often delivers more robust clusters. So, lets give it a shot. We could do it by hand, but the `HCPC` function already does that for us, and offers also a nice diagnostic viz.
+
+
+```{r}
+hcpc <- HCPC(res.pca, 
+             nb.clust = -1, #  self determined: higher relative loss of inertia
+             graph = FALSE) 
+```
+
+```{r}
+plot(hcpc, choice = "3D.map")
+```
+
+
+To finish up, lets plot it in a map, simplest way possible.
+
+```{r}
+library(ggmap)
+mapWorld <- borders("world", colour = "gray50", fill = "gray50")
+mp <- ggplot() +   mapWorld 
+mp + geom_point(aes(x = data$longitude, y = data$latitude) , color = hcpc$data.clust$clust) 
+  
+```
+
+### Note: Comparing with K-Means clustering algorithm
+You might have heard about the k-means clustering algorithm; if not, take a look at this tutorial. There are many fundamental differences between the two algorithms, although any one can perform better than the other in different cases. Some of the differences are:
+
+* **Distance used:* Hierarchical clustering can virtually handle any distance metric while k-means rely on euclidean distances.
+Stability of results: k-means requires a random step at its initialization that may yield different results if the process is re-run. That wouldn't be the case in hierarchical clustering.
+* **Number of Clusters:* While you can use elbow plots, Silhouette plot etc. to figure the right number of clusters in k-means, hierarchical too can use all of those but with the added benefit of leveraging the dendrogram for the same.
+* **Computation Complexity:* K-means is less computationally expensive than hierarchical clustering and can be run on large datasets within a reasonable time frame, which is the main reason k-means is more popular.
+
+# Your turn!
+So, why not have some fun on your own now? 
+

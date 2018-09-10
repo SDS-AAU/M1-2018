@@ -14,6 +14,10 @@
 
 [The same notebook but now with all outputs](http://nbviewer.jupyter.org/github/SDS-AAU/M1-2018/blob/master/M1_S3-4%20%28part%20one%29_with%20outputs.ipynb)
 
+## M1 - 5/6
+[Mapping and Geovisualization](http://nbviewer.jupyter.org/github/SDS-AAU/M1-2018/blob/master/M1_4_mapping.ipynb)
+
+[Datasourcing and Storage](http://nbviewer.jupyter.org/github/SDS-AAU/M1-2018/blob/master/M1_5_6_sourcing-and-dbs.ipynb)
 
 ## M1 - 7 : Unsupervised ML
 

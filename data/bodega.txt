@@ -1,0 +1,10 @@
+bodega;address
+Cafe Frederiksberg; Hadsundvej 1B, 9000 Aalborg
+Den Lille Havfrue; Hadsundvej 14, 9000 Aalborg
+Kahytten; Hadsundvej 11A, 9000 Aalborg
+Vejgaard Kroen; Hadsundvej 44, 9000 Aalborg
+Jægerstuen; Vendsysselgade 2, 9000 Aalborg
+Søkroen; Langelandsgade 2, 9000 Aalborg
+Færø-kroen/v Premovil A/S; Færøgade 57, 9000 Aalborg
+Restaurant Østerport v/Patricia Nielsen; Nørregade 32, 9000 Aalborg
+Hjerter Dame ApS; Danmarksgade 96, 9000 Aalborg

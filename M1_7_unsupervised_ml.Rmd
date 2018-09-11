@@ -12,15 +12,9 @@ output:
     toc: yes
 ---
 
-```{r setup, include = FALSE}
+```{r setup, include=FALSE}
 ### Generic preamble
 Sys.setenv(LANG = "en")
-
-### Install packages if necessary
-list.of.packages <- c("devtools", "rstudioapi", "knitr", "data.table", "skimr",  "ggridges", "recipes")
-new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
-if(length(new.packages)) install.packages(new.packages)
-rm(list.of.packages)
 
 ### Clean Workspace (I like to start clean)
 rm(list=ls()); graphics.off() # get rid of everything in the workspace
@@ -46,24 +40,51 @@ library(skimr) # Nice descriptives
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
 ```
 
+Some housekeeping: In case you don't have the necessary packages installed, run this script to do so.
+
+```{r}
+### Install packages if necessary
+list.of.packages <- c("devtools", "rstudioapi", "knitr", "tidyverse", "data.table", "skimr",  "factoextra", "FactoMineR", "GGally", "VIM", "mice", "reshape2")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
+rm(list.of.packages)
+```
+
+
 # Machine Learning: Some clarifications
 
 ## General
 
+As with any concept, machine learning may have a slightly different definition, depending on whom you ask. A little compilation of definitions by academics and practioneers alike:
+
+* "Machine Learning at its most basic is the practice of using algorithms to parse data, learn from it, and then make a determination or prediction about something in the world." - Nvidia 
+* "Machine learning is the science of getting computers to act without being explicitly programmed." - Stanford
+* "Machine learning is based on algorithms that can learn from data without relying on rules-based programming."- McKinsey & Co.
+* "Machine learning algorithms can figure out how to perform important tasks by generalizing from examples." - University of Washington
+* "The field of Machine Learning seeks to answer the question "How can we build computer systems that automatically improve with experience, and what are the fundamental laws that govern all learning processes?" - Carnegie Mellon University
+
+
+
 ## Supervised vs. Unsupervised ML
+
+![](media/m7_super_unsuper.png){width=750px}
+
+Sometimes, the lines are blurry, given the vast amount of algorithms and techniques, which constantly expands. 
+
+
+![](media/m7_ml_map.png){width=500px}
 
 ### Supervised ML
 
+* Concerned with labeling/classification/input-output-mapping/prediction tasks
+* Subject of the next lecture, so stay patient
+
 ### Unsupervised ML
 
-Finding homogenous subgroups within larger group
+Tasks related to pattern recognition and data exploration, in dase there yet does not exist a right answer or problem structure. Main application
 
-* Clustering
-
-Finding pa!erns in the features of the data
-
-* Dimensionality reduction
-
+1. **Dimensionality reduction:** Finding patterns in the features of the data
+2. **Clustering:** Finding homogenous subgroups within larger group
 
 # Dimensionality Reduction Techniques
 
@@ -75,7 +96,7 @@ Dimensions here is a synonym for variables, so what we want to really do is have
 
 * Find patterns in the **features** of the data
 * Visualization of **high-dimensional** data
-* Pre-processing before supervised learning
+* **Pre-processing** before supervised learning
 
 ### Overview over Techniques
 
@@ -88,35 +109,35 @@ The type of analysis to be performed depends on the data set formats and structu
 * **Hierarchical Multiple Factor Analysis (HMFA):** An extension of MFA in a situation where the data are organized into a hierarchical structure.
 * **Factor Analysis of Mixed Data (FAMD):** A particular case of the MFA, dedicated to analyze a data set containing both quantitative and qualitative variables.
 
-![](media/m7_dim_tech.png)
+![](media/m7_dim_tech.png){width=500px}
 
 ### Principal Component Analysis (PCA)
 
 #### General
 
-● A popular method is principal component analysis (PCA)
-● Three goals when finding lower dimensional
+* A popular method is principal component analysis (PCA)
+* Three goals when finding lower dimensional
 representation of features:
-● Find linear combination of variables to create
-principal components
-● Maintain most variance in the data
-● Principal components are uncorrelated (i.e.
-orthogonal to each other)
+     1. Find linear combination of variables to createprincipal components
+     2. Maintain most variance in the data
+     3. Principal components are uncorrelated (i.e.orthogonal to each other)
 
 #### The math and intuition behind it
 The mathematics underlying it are somewhat complex, so I won't go into too much detail, but the basics of PCA are as follows: you take a dataset with many variables, and you simplify that dataset by turning your original variables into a smaller number of "Principal Components".
 
-![](media/m7_PCA1.png){width=250px}
+![](media/m7_PCA1.png){width=500px}
 
 But what are these exactly? Principal Components are the underlying structure in the data. They are the directions where there is the most variance, the directions where the data is most spread out. This means that we try to find the straight line that best spreads the data out when it is projected along it. This is the first principal component, the straight line that shows the most substantial variance in the data.
 
-![](media/m7_PCA2.png){width=250px}
+![](media/m7_PCA2.png){width=500px}
 
 Where many variables correlate with one another, they will all contribute strongly to the same principal component. Each principal component sums up a certain percentage of the total variation in the dataset. Where your initial variables are strongly correlated with one another, you will be able to approximate most of the complexity in your dataset with just a few principal components. Usually, the first principal component captures the main similarity in your data, the second the main difference.
 
-![](media/m7_PCA3.png){width=250px}
+![](media/m7_PCA3.png){width=500px}
 
-These principal components can be computed via **Eigenvalues** and **Eigenvectors**. Just like many things in life, eigenvectors, and eigenvalues come in pairs: every eigenvector has a corresponding eigenvalue. Simply put, an eigenvector is a direction, such as "vertical" or "45 degrees", while an eigenvalue is a number telling you how much variance there is in the data in that direction. The eigenvector with the highest eigenvalue is, therefore, the first principal component. The number of eigenvalues and eigenvectors that exits is equal to the number of dimensions the data set has. Consequently, we can reframe a dataset in terms of these eigenvectors and eigenvalues without changing the underlying information. Note that reframing a dataset regarding a set of eigenvalues and eigenvectors does not entail changing the data itself, you’re just looking at it from a different angle, which should represent the data better.
+These principal components can be computed via **Eigenvalues** and **Eigenvectors**. Just like many things in life, eigenvectors, and eigenvalues come in pairs: every eigenvector has a corresponding eigenvalue. Simply put, an eigenvector is a direction, such as "vertical" or "45 degrees", while an eigenvalue is a number telling you how much variance there is in the data in that direction. The eigenvector with the highest eigenvalue is, therefore, the first principal component. The number of eigenvalues and eigenvectors that exits is equal to the number of dimensions the data set has. Consequently, we can reframe a dataset in terms of these eigenvectors and eigenvalues without changing the underlying information. 
+
+Note that reframing a dataset regarding a set of eigenvalues and eigenvectors does not entail changing the data itself, you're just looking at it from a different angle, which should represent the data better.
 
 ## Case study: (Digital) Nomad Life
 
@@ -141,7 +162,7 @@ data %<>%
 
 Lets take a look:
 
-```{r}
+```{r, results="asis"}
 head(data)
 glimpse(data)
 skim(data)
@@ -166,19 +187,19 @@ vars.desc <- c("nomad_score", "cost_nomad", "places_to_work", "freedom_score", "
 
 Ok, time for some exploration. Here I will introduce the `GGally` package, a wrapper for `ggplot2` which has some functions for very nice visual summaries in matrix form.
 
-```{r}
+```{r, warning=FALSE, echo=FALSE}
 library(GGally)
 ```
 
 First, lets look at a classical correlation matrix.
 
-```{r}
+```{r, fig.width=10,fig.height=10,fig.align='center'}
 ggcorr(data[vars], label = TRUE, label_size = 3, label_round = 2, label_alpha = TRUE)
 ```
 
 Even cooler, the `ggpairs` function creates you a scatterplot matrix plus all variable distributions and correlations. Before I used the package `PerformanceAnalytics` for that, but I like the ggplot-style more.
 
-```{r}
+```{r,fig.width=15,fig.height=15,fig.align='center'}
 ggpairs(data[,vars.desc], 
         aes(alpha = 0.3), 
         ggtheme = theme_gray())  
@@ -188,7 +209,7 @@ ggpairs(data[,vars.desc],
 #### Digression: Missing value imputation
 To remind you, component scores cannot be computed on missing features. So lets impute them. It's a good point to introduce you to some neath imputation techniques. First, the package `VIM` has some nice imputation functions, but also some nice diagnistic plots.
 
-```{r, echo = FALSE}
+```{r, warning=FALSE, echo=FALSE}
 library(VIM)
 ```
 
@@ -209,7 +230,7 @@ aggr(data[,vars],
 For the real imputation, I prefer the `mice` package, which works with a neural network "under the hood". Here, every feature is sequentially predicted by all other existing features in an iterative process. Since this process involves some stochachics, I define a seed upfront for reproducible results.
 
 
-```{r, echo = FALSE}
+```{r, echo=FALSE, warning=FALSE}
 set.seed(1337)
 
 library(mice)
@@ -219,7 +240,7 @@ data.mice <- mice(data = data[,vars], m = 1, maxit = 100, seed = 1337)
 
 Let's look at the distribution of the imputed vs. the existing features.
 
-```{r}
+```{r,fig.align='center'}
 densityplot(data.mice)
 ```
 
@@ -237,9 +258,9 @@ rm(data.mice, data.imp, var.imp)
 
 ### Dimensionality reduction
 
-To execute the PCA, we'll here use the [`FactoMineR`](http://factominer.free.fr/) package to compute PCA, and  [`factoextra`](https://github.com/kassambara/factoextra) for extracting and visualizing the results. `FactoMineR` is a great and my favorite package for computing principal component methods in R. It’s very easy to use and very well documented. There are other alternatives around, but I since quite some time find it to be the most powerful and convenient one. `factoextra` is just a convenient `ggplot` wrapper that easily produces nice and informative diagnistic plots for a variety of DR and clustering techniques.
+To execute the PCA, we'll here use the [`FactoMineR`](http://factominer.free.fr/) package to compute PCA, and  [`factoextra`](https://github.com/kassambara/factoextra) for extracting and visualizing the results. `FactoMineR` is a great and my favorite package for computing principal component methods in R. It's very easy to use and very well documented. There are other alternatives around, but I since quite some time find it to be the most powerful and convenient one. `factoextra` is just a convenient `ggplot` wrapper that easily produces nice and informative diagnistic plots for a variety of DR and clustering techniques.
 
-```{r}
+```{r,warning=FALSE,echo=FALSE}
 library(FactoMineR)
 library(factoextra)
 ```
@@ -253,7 +274,7 @@ glimpse(res.pca)
 
 Ok, lets see look at the "screeplot", a diagnostic visualization that displays the variance explained by every component. We here use the `factoextra` package, like for all following visualizations with the `fviz_` prefix. Notice that the output in every case is an `ggplot2` object, which could be complemented with further layers.
 
-```{r}
+```{r,fig.align='center'}
 fviz_screeplot(res.pca, 
                addlabels = TRUE, 
                ncp = 10, 
@@ -263,13 +284,13 @@ fviz_screeplot(res.pca,
 As expected, we see that the first component already captures a main share of the variance. Let's look at the corresponding eigenvalues.
 
 ```{r}
-res.pca$eig
+as_tibble(res.pca$eig)
 ```
 
 For feature selection, our rule-of-thumb is to only include components with an eigenvalue > 1, meaning that we in this case would have reduced our data to 4 dimensions. Lets project them onto 2-dimensional space and take a look at the vector of our features.
 
 
-```{r}
+```{r,fig.width=10,fig.height=10,fig.align='center'}
 fviz_pca_var(res.pca, 
              alpha.var = "cos2",
              col.var = "contrib",
@@ -288,19 +309,19 @@ Lets look at the numeric values.
 
 ```{r}
 get_pca_var(res.pca)
-res.pca$var$coord
+as_data_frame(res.pca$var$coord)
 ```
 
 The results-object also contains the observations loading on the components.
 
 ```{r}
 get_pca_var(res.pca)
-head(res.pca$ind$coord) 
+as_data_frame(head(res.pca$ind$coord))
 ```
 
 Let's visualize our observations and the variable-loading together in the space of the first 2 components.
 
-```{r}
+```{r,,fig.width=15,fig.height=10,fig.align='center'}
 fviz_pca_biplot(res.pca,
                 alpha.ind = "cos2",
                 col.ind = "contrib",
@@ -309,11 +330,27 @@ fviz_pca_biplot(res.pca,
                 ggtheme = theme_gray()) 
 ```
 
+
+We cal also briefly check if our ndimensionality reductions is helpful to differentiate between `nomadscore`.
+
+```{r,,fig.width=10,fig.height=10,fig.align='center'}
+data %<>%
+  mutate(popular = ifelse(nomad_score > mean(nomad_score), TRUE, FALSE))
+
+fviz_pca_biplot(res.pca,
+                alpha.ind = "cos2",
+                geom = "point", 
+                habillage = factor(data$popular), 
+                addEllipses = TRUE,
+                ggtheme = theme_gray()) 
+```
+
+
 ### Note: Vectorization and distances
 
 Just a sidenote (which might become more important in later lectures): The components delivered by a PCA can also be used to create distance or similarity measures between two observations. You might need to refresh a bit of your vector algebra for the different ways to crate distance measures between vectors. Here, we just will use the simple "euclidian" distance in n-dimensional space. This can be done with the base-R `dist()` function. However, the `FactoMineR` has a function `get_dist()` which I prefer, since it includes a couple of other useful distance measurs.
 
-```{r}
+```{r,fig.width=10,fig.height=10,fig.align='center'}
 dist.res <- get_dist(res.pca$ind$coord, method = "euclidean")
 fviz_dist(dist.res)
 ```
@@ -327,9 +364,16 @@ rownames(dist) <- data %>% pull(place)
 colnames(dist) <- data %>% pull(place)
 ```
 
-This matrix we could, for example, use to create a distance metwork (as we will do in M2). When continuing with "tidy" data, we would like to transform it in what we in network-jargon call a "edgelist". That can be most easily done with the `reshape2` package. Notice: This is a very convenient but not the most efficient way to create distance edgelists. In case we have a very large number of entities, you might want to learn how to deal with sarse-matrices. More on that again in M2.
+This matrix we could, for example, use to create a distance metwork (as we will do in M2). When continuing with "tidy" data, we would like to transform it in what we in network-jargon call a "edgelist". So, that's a classical use of the `gather()` function. However, since we have a matrix here, I will use the `melt()` function of the `reshape2` package, since it automatically tidies the names of amtrix dimensions.Notice: This is a very convenient but not the most efficient way to create distance edgelists. In case we have a very large number of entities, you might want to learn how to deal with sarse-matrices. More on that again in M2.
 
 ```{r}
+# Somehow doesnt work
+# dist_el <- dist %>%
+#   as_tibble() %>%
+#   rownames_to_column(var = "Var1") %>%
+#   gather(key = Var2, value = dist, 2:nrow(.)) 
+
+# Alternative (more convenient here, but not dplyr style)
 library(reshape2)
 dist_el <- melt(dist) 
 
@@ -339,6 +383,7 @@ dist_el %<>%
 
 head(dist_el)  
 ```
+
 
 Ok, lets just take a brief look which cities are most similar, and most distant in terms of their characteristics.
 
@@ -368,33 +413,36 @@ rm(dist, dist_el, dist.res)
 ### Types of Clustering
 Clustering can be broadly divided into two subgroups:
 
-1. Hard clustering: in hard clustering, each data object or point either belongs to a cluster completely or not. For example in the Uber dataset, each location belongs to either one borough or the other.
-2. Soft clustering: in soft clustering, a data point can belong to more than one cluster with some probability or likelihood value. For example, you could identify some locations as the border points belonging to two or more boroughs.
+1. **Hard clustering:** in hard clustering, each data object or point either belongs to a cluster completely or not. For example in the Uber dataset, each location belongs to either one borough or the other.
+2. **Soft clustering:** in soft clustering, a data point can belong to more than one cluster with some probability or likelihood value. For example, you could identify some locations as the border points belonging to two or more boroughs.
 
-Clustering algorithms can be categorized based on their cluster model, that is based on how they form clusters or groups. This tutorial only highlights some of the prominent clustering algorithms.
+Clustering algorithms can also be categorized based on their **cluster model**, that is based on how they form clusters or groups. This tutorial only highlights some of the prominent clustering algorithms.
 
-* **Connectivity-based clustering:** the main idea behind this clustering is that data points that are closer in the data space are more related (similar) than to data points farther away. The clusters are formed by connecting data points according to their distance. At different distances, different clusters will form and can be represented using a dendrogram, which gives away why they are also commonly called "hierarchical clustering". These methods do not produce a unique partitioning of the dataset, rather a hierarchy from which the user still needs to choose appropriate clusters by choosing the level where they want to cluster. They are also not very robust towards outliers, which might show up as additional clusters or even cause other clusters to merge.
+* **Connectivity-based clustering:** the main idea behind this clustering is that data points that are closer in the data space are more related (similar) than to data points farther away. The clusters are formed by connecting data points according to their distance. At different distances, different clusters will form and can be represented using a dendrogram, which gives away why they are also commonly called **hierarchical clustering**. These methods do not produce a unique partitioning of the dataset, rather a hierarchy from which the user still needs to choose appropriate clusters by choosing the level where they want to cluster. Note: They are also not very robust towards outliers, which might show up as additional clusters or even cause other clusters to merge.
 
-* **Centroid-based clustering:** in this type of clustering, clusters are represented by a central vector or a centroid. This centroid might not necessarily be a member of the dataset. This is an iterative clustering algorithms in which the notion of similarity is derived by how close a data point is to the centroid of the cluster. k-means is a centroid based clustering, and will you see this topic more in detail later on in the tutorial.
+* **Centroid-based clustering:** in this type of clustering, clusters are represented by a central vector or a centroid. This centroid might not necessarily be a member of the dataset. This is an iterative clustering algorithms in which the notion of similarity is derived by how close a data point is to the centroid of the cluster. **k-means** is a centroid based clustering, and will you see this topic more in detail later on in the tutorial.
 
 * **Distribution-based clustering:** this clustering is very closely related to statistics: distributional modeling. Clustering is based on the notion of how probable is it for a data point to belong to a certain distribution, such as the Gaussian distribution, for example. Data points in a cluster belong to the same distribution. These models have a strong theoritical foundation, however they often suffer from overfitting. Gaussian mixture models, using the expectation-maximization algorithm is a famous distribution based clustering method.
 
-* **Density-based methods:^^ search the data space for areas of varied density of data points. Clusters are defined as areas of higher density within the data space compared to other regions. Data points in the sparse areas are usually considered to be noise and/or border points. The drawback with these methods is that they expect some kind of density guide or parameters to detect cluster borders. DBSCAN and OPTICS are some prominent density based clustering.
+* **Density-based methods:** search the data space for areas of varied density of data points. Clusters are defined as areas of higher density within the data space compared to other regions. Data points in the sparse areas are usually considered to be noise and/or border points. The drawback with these methods is that they expect some kind of density guide or parameters to detect cluster borders. `DBSCAN` and `OPTICS` are some prominent density based clustering.
 
 So, what is the best to use? Hard to say. Clustering is an subjective task and there can be more than one correct clustering algorithm. Every algorithm follows a different set of rules for defining the 'similarity' among data points. The most appropriate clustering algorithm for a particular problem often needs to be chosen experimentally, unless there is a mathematical reason to prefer one clustering algorithm over another. An algorithm might work well on a particular dataset but fail for a different kind of dataset. Since there is most times no wrong or right, the clustering that delivers the most useful results is the way to go.
 
 ## K-means Clustering
 K-means clustering is the most commonly used unsupervised machine learning algorithm for dividing a given dataset into `k` clusters, which must be provided by the user. The basic idea behind k-means clustering consists of defining clusters so that the total intra-cluster variation (known as total within-cluster variation) is minimized. There are several k-means algorithms available. However, the standard algorithm defines the total within-cluster variation as the sum of squared distances Euclidean distances between items and the corresponding centroid. Its an iterative process containing the following steps
 
-1. Specify k - the number of clusters to be created.
-2. Select randomly k objects from the dataset as the initial cluster centers.
+1. Specify `k` - the number of clusters to be created.
+2. Select randomly `k` objects from the dataset as the initial cluster centers.
+![](media/m7_km1.png){width=500px}
 3. Assign each observation to their closest centroid, based on the Euclidean distance between the object and the centroid.
-4. For each of the k clusters recompute the cluster centroid by calculating the new mean value of all the data points in the cluster.
-5. Iteratively minimize the total within sum of square. Repeat Step 3 and Step 4, until the centroids do not change or the maximum number of iterations is reached (R uses 10 as the default value for the maximum number of iterations).
+4. For each of the `k` clusters recompute the cluster centroid by calculating the new mean value of all the data points in the cluster.
+![](media/m7_km2.png){width=500px}
+5. Iteratively minimize the total within sum of square. Repeat Step 3 and Step 4, until the centroids do not change or the maximum number of iterations is reached (`R` uses 10 as the default value for the maximum number of iterations).
+![](media/m7_km3.png){width=500px}
 
-So, lets do that. As already mentioned, we have to upfront choose our `k`. However, there exists some guidance, for example the highest gain in "total within sum of sqares" (fast to calculate), as well as the "gap statistics" (hard to calculate, takes time).
+So, lets do that. As already mentioned, we have to upfront choose our `k`. However, there exists some guidance, for example the highest gain in "total within sum of sqares" (fast to calculate), the "siluette", as well as the "gap statistics" (hard to calculate, takes time).
 
-```{r}
+```{r,fig.align='center'}
 fviz_nbclust(scale(data[,vars]), 
              kmeans, 
              method = "wss")  
@@ -416,7 +464,7 @@ glimpse(km)
 
 Again, lets visualize it. To have a meaningful way for 2d visualization, we again project the observations on the space of the first 2 components.
 
-```{r}
+```{r,,fig.width=15,fig.height=10,fig.align='center'}
 fviz_cluster(km, data = data[,vars],
              ggtheme = theme_gray())  
 ```
@@ -445,18 +493,31 @@ The key operation in hierarchical agglomerative clustering is to repeatedly comb
 
 1. It starts by calculating the distance between every pair of observation points and store it in a distance matrix.
 2. It then puts every point in its own cluster.
+
+![](media/m7_hc1.png){width=500px}
 3. Then it starts merging the closest pairs of points based on the distances from the distance matrix and as a result the amount of clusters goes down by 1.
+
+![](media/m7_hc2.png){width=500px}
 4. Then it recomputes the distance between the new cluster and the old ones and stores them in a new distance matrix.
 5. Lastly it repeats steps 2 and 3 until all the clusters are merged into one single cluster.
+
+![](media/m7_hc3.png){width=500px}
 
 There are several ways to measure the distance between clusters in order to decide the rules for clustering, and they are often called Linkage Methods. Some of the common linkage methods are:
 
 * **Complete-linkage:** calculates the maximum distance between clusters before merging.
 * **Single-linkage:** calculates the minimum distance between the clusters before merging. This linkage may be used to detect high values in your dataset which may be outliers as they will be merged at the end.
 * **Average-linkage:** calculates the average distance between clusters before merging.
-* **Centroid-linkage:** finds centroid of cluster 1 and centroid of cluster 2, and then calculates the distance between the two before merging.
+* **Centroid-linkage:** finds centroid of cluster 1 and centroid of cluster 2, and then calculates the distance between the two before merging (hint: usually not a good idea).
 
 The choice of linkage method entirely depends on you and there is no hard and fast method that will always give you good results. Different linkage methods lead to different clusters.
+
+Some further practical issues:
+
+* Data on different scales can cause undesirable resultsin clustering methods
+* Solution is to scale data so that features have same mean and standard deviation
+* Subtract mean of a feature from all observations, Divide each feature by the standard deviation ofthe feature
+* Normalized features have a mean of zero and a standard deviation of one
 
 ### Performing a hirarchical clustering
 However, let's get it started and perform a cluster. We here use the `hcut` function, which includes most of the abovementioned mapproaches as options.
@@ -467,7 +528,7 @@ hc <- hcut(data[,vars], hc_func = "hclust", k = 3, stand = TRUE)
 
 In hierarchical clustering, you categorize the objects into a hierarchy similar to a tree-like diagram which is called a dendrogram. The distance of split or merge (called height) is shown on the y-axis of the dendrogram below.
 
-```{r}
+```{r,,fig.width=15,fig.height=10,fig.align='center'}
 fviz_dend(hc, 
           rect = TRUE, 
           cex = 0.5)
@@ -488,33 +549,20 @@ data %>%
 
 And again visualize them:
 
-```{r}
+```{r,,fig.width=15,fig.height=10,fig.align='center'}
 fviz_cluster(hc, data = data[,vars],
              ggtheme = theme_gray())  
 ```
 
 Looks very similar, even though the middle cluster is a bit more sqeezed in between now. We can also use our scatterplot diagnostics again, and color the observations by their cluster assignment.
 
-```{r}
+```{r,,fig.width=15,fig.height=15,fig.align='center'}
 ggpairs(data[,vars.desc], 
         lower = list(continuous = "smooth"), 
         aes(colour = as.factor(hc$cluster), alpha = 0.4),
         progress = FALSE,
         ggtheme = theme_gray() )
 ```
-
-
-
-
-data %<>%
-  mutate(popular = ifelse(nomad_score > mean(nomad_score), TRUE, FALSE))
-
-fviz_pca_biplot(res.pca,
-                alpha.ind = "cos2",
-                geom = "point", 
-                habillage = factor(data$popular), 
-                addEllipses = TRUE,
-                ggtheme = theme_gray()) 
 
 
 ### Hirarchical Clustering based in PCA
@@ -527,14 +575,14 @@ hcpc <- HCPC(res.pca,
              graph = FALSE) 
 ```
 
-```{r}
+```{r,,fig.width=15,fig.height=10,fig.align='center'}
 plot(hcpc, choice = "3D.map")
 ```
 
 
 To finish up, lets plot it in a map, simplest way possible.
 
-```{r}
+```{r,,fig.width=15,fig.height=10,fig.align='center',echo=FALSE,warning=FALSE}
 library(ggmap)
 mapWorld <- borders("world", colour = "gray50", fill = "gray50")
 mp <- ggplot() +   mapWorld 
@@ -545,21 +593,31 @@ mp + geom_point(aes(x = data$longitude, y = data$latitude) , color = hcpc$data.c
 ### Note: Comparing with K-Means clustering algorithm
 You might have heard about the k-means clustering algorithm; if not, take a look at this tutorial. There are many fundamental differences between the two algorithms, although any one can perform better than the other in different cases. Some of the differences are:
 
-* **Distance used:* Hierarchical clustering can virtually handle any distance metric while k-means rely on euclidean distances.
+* **Distance used:** Hierarchical clustering can virtually handle any distance metric while k-means rely on euclidean distances.
 Stability of results: k-means requires a random step at its initialization that may yield different results if the process is re-run. That wouldn't be the case in hierarchical clustering.
-* **Number of Clusters:* While you can use elbow plots, Silhouette plot etc. to figure the right number of clusters in k-means, hierarchical too can use all of those but with the added benefit of leveraging the dendrogram for the same.
-* **Computation Complexity:* K-means is less computationally expensive than hierarchical clustering and can be run on large datasets within a reasonable time frame, which is the main reason k-means is more popular.
+* **Number of Clusters:** While you can use elbow plots, Silhouette plot etc. to figure the right number of clusters in k-means, hierarchical too can use all of those but with the added benefit of leveraging the dendrogram for the same.
+* **Computation Complexity:** K-means is less computationally expensive than hierarchical clustering and can be run on large datasets within a reasonable time frame, which is the main reason k-means is more popular.
 
+### Note: Measuring Godness-of-Fit in clusters
+Perhaps the most important part in any unsupervised learning task is the analysis of the results. After you have performed the clustering using any algorithm and any sets of parameters you need to make sure that you did it right. But how do you determine that?
+
+Well, there are many measures to do this, perhaps the most popular one is the Dunn's Index. Dunn's index is the ratio between the minimum inter-cluster distances to the maximum intra-cluster diameter. The diameter of a cluster is the distance between its two furthermost points. In order to have well separated and compact clusters you should aim for a higher Dunn's index.
+
+Furthermore, graphical inspection often helps comparing the results of different algorithms and poarameters. [Here](https://cran.r-project.org/web/packages/dendextend/vignettes/Cluster_Analysis.html) you find some advanced diagnostic visualizations for hirarchical clustering.
+
+Lastly, a clusters quality is to a large extend determined by its usefulness.
+* Internal Validity
+* External Validity
 
 # Your turn!
 So, why not have some fun on your own now? try to use what you learned up to now in the following extercise. [---> HERE <---](https://github.com/SDS-AAU/M1-2018/blob/master/data/vsm13.csv) you will find a dataset on Gert Hofstede's ["6-D model of national culture""](https://geerthofstede.com/culture-geert-hofstede-gert-jan-hofstede/6d-model-of-national-culture/). This popular measures of country-level culture in (by now) 6 dimensions became very popular in sociology, economics, and management science to explain cross-cultural interaction as well as frictions. a exhaustive documentation of the 2013 dataset can be found [here](https://geerthofstede.com/wp-content/uploads/2016/07/Manual-VSM-2013.pdf). It contains the following variables.
 
-** **`pdi:`**  The power distance index is defined as “the extent to which the less powerful members of organizations and institutions (like the family) accept and expect that power is distributed unequally.” In this dimension, inequality and power is perceived from the followers, or the lower level. A higher degree of the Index indicates that hierarchy is clearly established and executed in society, without doubt or reason. A lower degree of the Index signifies that people question authority and attempt to distribute power.
-** **`idv:`**  This index explores the “degree to which people in a society are integrated into groups.” Individualistic societies have loose ties that often only relates an individual to his/her immediate family. They emphasize the “I” versus the “we.” Its counterpart, collectivism, describes a society in which tightly-integrated relationships tie extended families and others into in-groups. These in-groups are laced with undoubted loyalty and support each other when a conflict arises with another in-group.
-** **`mas:`**  In this dimension, masculinity is defined as “a preference in society for achievement, heroism, assertiveness and material rewards for success.” Its counterpart represents “a preference for cooperation, modesty, caring for the weak and quality of life.” Women in the respective societies tend to display different values. In feminine societies, they share modest and caring views equally with men. In more masculine societies, women are somewhat assertive and competitive, but notably less than men. In other words, they still recognize a gap between male and female values. This dimension is frequently viewed as taboo in highly masculine societies.
-** **`uai:`**  The uncertainty avoidance index is defined as “a society's tolerance for ambiguity,” in which people embrace or avert an event of something unexpected, unknown, or away from the status quo. Societies that score a high degree in this index opt for stiff codes of behavior, guidelines, laws, and generally rely on absolute truth, or the belief that one lone truth dictates everything and people know what it is. A lower degree in this index shows more acceptance of differing thoughts or ideas. Society tends to impose fewer regulations, ambiguity is more accustomed to, and the environment is more free-flowing.
-** **`ltowvs:`** This dimension associates the connection of the past with the current and future actions/challenges. A lower degree of this index (short-term) indicates that traditions are honored and kept, while steadfastness is valued. Societies with a high degree in this index (long-term) views adaptation and circumstantial, pragmatic problem-solving as a necessity. A poor country that is short-term oriented usually has little to no economic development, while long-term oriented countries continue to develop to a point. 
-** **`ivr:`**  This dimension is essentially a measure of happiness; whether or not simple joys are fulfilled. Indulgence is defined as “a society that allows relatively free gratification of basic and natural human desires related to enjoying life and having fun.” Its counterpart is defined as “a society that controls gratification of needs and regulates it by means of strict social norms.” Indulgent societies believe themselves to be in control of their own life and emotions; restrained societies believe other factors dictate their life and emotions
+* **`pdi:`**  The power distance index is defined as "the extent to which the less powerful members of organizations and institutions (like the family) accept and expect that power is distributed unequally."In this dimension, inequality and power is perceived from the followers, or the lower level. A higher degree of the Index indicates that hierarchy is clearly established and executed in society, without doubt or reason. A lower degree of the Index signifies that people question authority and attempt to distribute power.
+* **`idv:`**  This index explores the "degree to which people in a society are integrated into groups."" Individualistic societies have loose ties that often only relates an individual to his/her immediate family. They emphasize the "I" versus the "we". Its counterpart, collectivism, describes a society in which tightly-integrated relationships tie extended families and others into in-groups. These in-groups are laced with undoubted loyalty and support each other when a conflict arises with another in-group.
+* **`mas:`**  In this dimension, masculinity is defined as "a preference in society for achievement, heroism, assertiveness and material rewards for success."" Its counterpart represents "a preference for cooperation, modesty, caring for the weak and quality of life." Women in the respective societies tend to display different values. In feminine societies, they share modest and caring views equally with men. In more masculine societies, women are somewhat assertive and competitive, but notably less than men. In other words, they still recognize a gap between male and female values. This dimension is frequently viewed as taboo in highly masculine societies.
+* **`uai:`**  The uncertainty avoidance index is defined as "a society's tolerance for ambiguity," in which people embrace or avert an event of something unexpected, unknown, or away from the status quo. Societies that score a high degree in this index opt for stiff codes of behavior, guidelines, laws, and generally rely on absolute truth, or the belief that one lone truth dictates everything and people know what it is. A lower degree in this index shows more acceptance of differing thoughts or ideas. Society tends to impose fewer regulations, ambiguity is more accustomed to, and the environment is more free-flowing.
+* **`ltowvs:`** This dimension associates the connection of the past with the current and future actions/challenges. A lower degree of this index (short-term) indicates that traditions are honored and kept, while steadfastness is valued. Societies with a high degree in this index (long-term) views adaptation and circumstantial, pragmatic problem-solving as a necessity. A poor country that is short-term oriented usually has little to no economic development, while long-term oriented countries continue to develop to a point. 
+* **`ivr:`**  This dimension is essentially a measure of happiness; whether or not simple joys are fulfilled. Indulgence is defined as "a society that allows relatively free gratification of basic and natural human desires related to enjoying life and having fun." Its counterpart is defined as "a society that controls gratification of needs and regulates it by means of strict social norms. Indulgent societies believe themselves to be in control of their own life and emotions; restrained societies believe other factors dictate their life and emotions
 
 
 Ok, looks interesting. Let's do the fololwing:

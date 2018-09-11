@@ -495,9 +495,11 @@ The key operation in hierarchical agglomerative clustering is to repeatedly comb
 2. It then puts every point in its own cluster.
 
 ![](media/m7_hc1.png){width=500px}
+
 3. Then it starts merging the closest pairs of points based on the distances from the distance matrix and as a result the amount of clusters goes down by 1.
 
 ![](media/m7_hc2.png){width=500px}
+
 4. Then it recomputes the distance between the new cluster and the old ones and stores them in a new distance matrix.
 5. Lastly it repeats steps 2 and 3 until all the clusters are merged into one single cluster.
 
@@ -594,7 +596,7 @@ mp + geom_point(aes(x = data$longitude, y = data$latitude) , color = hcpc$data.c
 You might have heard about the k-means clustering algorithm; if not, take a look at this tutorial. There are many fundamental differences between the two algorithms, although any one can perform better than the other in different cases. Some of the differences are:
 
 * **Distance used:** Hierarchical clustering can virtually handle any distance metric while k-means rely on euclidean distances.
-Stability of results: k-means requires a random step at its initialization that may yield different results if the process is re-run. That wouldn't be the case in hierarchical clustering.
+* **Stability of results:** k-means requires a random step at its initialization that may yield different results if the process is re-run. That wouldn't be the case in hierarchical clustering.
 * **Number of Clusters:** While you can use elbow plots, Silhouette plot etc. to figure the right number of clusters in k-means, hierarchical too can use all of those but with the added benefit of leveraging the dendrogram for the same.
 * **Computation Complexity:** K-means is less computationally expensive than hierarchical clustering and can be run on large datasets within a reasonable time frame, which is the main reason k-means is more popular.
 

@@ -26,4 +26,4 @@
 
 ## M1 - 8 : Supervised ML
 
-[M1-8 Notebook]()
+[M1-8 Notebook](https://rawgit.com/SDS-AAU/M1-2018/master/M1_8_supervised_ml.html)

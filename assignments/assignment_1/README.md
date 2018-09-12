@@ -6,7 +6,7 @@ Daniel S. Hain (<dsh@business.aau.dk>) & Roman Jurowetzki (<roman@business.aau.d
 Introduction
 ============
 
-In your first assignment, you will mainly work on the first part of the Data Science pipeline, \*\*OSE\*\*. In particular, you will:
+In your first assignment, you will mainly work on the first part of the Data Science pipeline, **OSE**. In particular, you will:
 
 -   Clean real-life data, with all its messiness (warning: Roman's scraped data included!).
 -   Join data from multiple sources, and on multiple levels of aggregation
@@ -15,7 +15,7 @@ In your first assignment, you will mainly work on the first part of the Data Sci
 Data: What data do you get?
 ===========================
 
-You will explore the already known data on "digital nomads", this time the freshly crawled version. Preliminary findings of our work on that are summarized in [this presentation](https://aaudk-my.sharepoint.com/:b:/g/personal/dsh_id_aau_dk/ESeuvplEytZCuNBhKGmA4U8BOGpfbGIbilqTGdgQLA4a6A?e=UGRnvR). You probably already know the data from [NomadList](https://nomadlist.com/). The files can be found in the `data` folder of the assignment.
+You will explore the already known data on **digital nomads**, this time the freshly crawled version. Preliminary findings of our work on that are summarized in [this presentation](https://aaudk-my.sharepoint.com/:b:/g/personal/dsh_id_aau_dk/ESeuvplEytZCuNBhKGmA4U8BOGpfbGIbilqTGdgQLA4a6A?e=UGRnvR). You probably already know the data from [NomadList](https://nomadlist.com/). The files can be found in the `data` folder of the assignment.
 
 City data:
 ----------
@@ -109,3 +109,4 @@ Hints
 
 -   besides the usuall stuff, you will particularly find some issues with character values. So, a little refresher or deep-dive into **regular expressions** and **string manipulation** might be necesssary. Consider in `R` the `tidyverse` package [`stringr`](https://www.rstudio.com/wp-content/uploads/2016/09/RegExCheatsheet.pdf), in `Python` the string-manipulation functions by `Pandas`
 -   Likewise, you will face issues with date-time data, such as conversions and the calculation of time-spans. In `R`, consider the `tidyverse` package [`lubridate`](https://lubridate.tidyverse.org/), in `Python` the date-manipulation functions by `Pandas` (eg., `to_datetime`)
+-   Format your document properly, meaning give it a clear and easy-to-follow structure. Don't make it to fancy and pretty, that is not the main part of the exercise. You will need some `markdown` syntax. it's ridiccously simple. All you really need you find [---&gt; Here &lt;---](https://guides.github.com/features/mastering-markdown/)

@@ -1,4 +1,4 @@
-SDS Autumn 2008, M1, Assignment 1
+SDS Autumn 2018, M1, Assignment 1
 ================
 Daniel S. Hain (<dsh@business.aau.dk>) & Roman Jurowetzki (<roman@business.aau.dk>)
 12/09/2018

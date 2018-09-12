@@ -94,7 +94,7 @@ Further process and dates
 =========================
 
 -   You will receive an upload link on peergrade.io by Monday (16.09.2018) morning with concrete instructions.
--   The notebook upload is also due Monday Monday (16.09.2018), 11:55pm. Dellays are not accepted.
+-   The notebook upload is also due Monday (16.09.2018), 11:55pm. Dellays are not accepted.
 -   On latest Wednesday (19.09.2018), you will recieve an invitation to peergrade your fellows exams on peergrade.io. You will be asked for the evaluation of 3 peer-assignments is part of the assignment and mandatory.
 -   The peergrade evaluation is due Friday (21.09.2018), 11:55pm. Dellays are not accepted.
 

@@ -3,12 +3,12 @@ title: 'M1-7: Unsupervised Machine Learning'
 author: "Daniel S. Hain (dsh@business.aau.dk)"
 date: "12/09/2018"
 output:
-  html_document:
-    df_print: paged
-    toc: yes
   html_notebook:
     df_print: paged
     number_sections: no
+    toc: yes
+  html_document:
+    df_print: paged
     toc: yes
 ---
 
@@ -199,7 +199,7 @@ ggcorr(data[vars], label = TRUE, label_size = 3, label_round = 2, label_alpha = 
 
 Even cooler, the `ggpairs` function creates you a scatterplot matrix plus all variable distributions and correlations. Before I used the package `PerformanceAnalytics` for that, but I like the ggplot-style more.
 
-```{r,fig.width=15,fig.height=15,fig.align='center'}
+```{r}
 ggpairs(data[,vars.desc], 
         aes(alpha = 0.3), 
         ggtheme = theme_gray())  
@@ -584,7 +584,7 @@ plot(hcpc, choice = "3D.map")
 
 To finish up, lets plot it in a map, simplest way possible.
 
-```{r,,fig.width=15,fig.height=10,fig.align='center',echo=FALSE,warning=FALSE}
+```{r}
 library(ggmap)
 mapWorld <- borders("world", colour = "gray50", fill = "gray50")
 mp <- ggplot() +   mapWorld 

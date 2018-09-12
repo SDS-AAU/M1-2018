@@ -6,7 +6,7 @@ Daniel S. Hain (<dsh@business.aau.dk>) & Roman Jurowetzki (<roman@business.aau.d
 Introduction
 ============
 
-In your first assignment, you will mainly work on the first part of the Data Science pipeline, \*\*OSE\*”\*\*. In particular, you will:
+In your first assignment, you will mainly work on the first part of the Data Science pipeline, \*\*OSE\*\*. In particular, you will:
 
 -   Clean real-life data, with all its messiness (warning: Roman's scraped data included!).
 -   Join data from multiple sources, and on multiple levels of aggregation

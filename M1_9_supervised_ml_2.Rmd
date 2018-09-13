@@ -1,0 +1,38 @@
+---
+title: 'M1-9: Supervised Machine Learning 2: Model boosting, diagnostics, explanation'
+author: "Daniel S. Hain (dsh@business.aau.dk)"
+date: "14/09/2018"
+output:
+  html_notebook:
+    df_print: paged
+    number_sections: no
+    toc: yes
+  html_document:
+    df_print: paged
+    toc: yes
+---
+
+# Introduction
+
+
+# Some ML tricks (bagging, boosting, bootstrapping)
+
+
+
+
+# Ensemble models
+
+
+
+
+
+# Model explainability
+
+## Global explanation
+
+
+## Local Explanation
+
+> *"There once was a package called lime, Whose models were simply sublime, It gave explanations for their variations, one observation at a time."*
+*lime-rick by Mara Averick*
+

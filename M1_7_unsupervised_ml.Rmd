@@ -67,12 +67,19 @@ As with any concept, machine learning may have a slightly different definition, 
 
 ## Supervised vs. Unsupervised ML
 
+### An intuitive perspective
+
+![](media/m7_super_unsuper2.png){width=750px}
+
+### A functional perspective
+
 ![](media/m7_super_unsuper.png){width=750px}
+
+### Overview over types and classes of algorithms
 
 Sometimes, the lines are blurry, given the vast amount of algorithms and techniques, which constantly expands. 
 
-
-![](media/m7_ml_map.png){width=500px}
+![](media/m7_ml_map.png){width=1000px}
 
 ### Supervised ML
 
@@ -187,19 +194,19 @@ vars.desc <- c("nomad_score", "cost_nomad", "places_to_work", "freedom_score", "
 
 Ok, time for some exploration. Here I will introduce the `GGally` package, a wrapper for `ggplot2` which has some functions for very nice visual summaries in matrix form.
 
-```{r, warning=FALSE, echo=FALSE}
+```{r,warning=FALSE,echo=FALSE}
 library(GGally)
 ```
 
 First, lets look at a classical correlation matrix.
 
-```{r, fig.width=10,fig.height=10,fig.align='center'}
+```{r,fig.width=10,fig.height=10,fig.align='center'}
 ggcorr(data[vars], label = TRUE, label_size = 3, label_round = 2, label_alpha = TRUE)
 ```
 
 Even cooler, the `ggpairs` function creates you a scatterplot matrix plus all variable distributions and correlations. Before I used the package `PerformanceAnalytics` for that, but I like the ggplot-style more.
 
-```{r}
+```{rfig.width=10,fig.height=10,fig.align='center'}
 ggpairs(data[,vars.desc], 
         aes(alpha = 0.3), 
         ggtheme = theme_gray())  
@@ -209,12 +216,12 @@ ggpairs(data[,vars.desc],
 #### Digression: Missing value imputation
 To remind you, component scores cannot be computed on missing features. So lets impute them. It's a good point to introduce you to some neath imputation techniques. First, the package `VIM` has some nice imputation functions, but also some nice diagnistic plots.
 
-```{r, warning=FALSE, echo=FALSE}
+```{r,warning=FALSE,echo=FALSE}
 library(VIM)
 ```
 
 
-```{r}
+```{rfig.width=10,fig.height=10,fig.align='center'}
 marginmatrix(data[,vars.desc]) # Note: Cool feature, but matrix becones just too big for many features
 
 aggr(data[,vars], 
@@ -230,7 +237,7 @@ aggr(data[,vars],
 For the real imputation, I prefer the `mice` package, which works with a neural network "under the hood". Here, every feature is sequentially predicted by all other existing features in an iterative process. Since this process involves some stochachics, I define a seed upfront for reproducible results.
 
 
-```{r, echo=FALSE, warning=FALSE}
+```{r,echo=FALSE,warning=FALSE}
 set.seed(1337)
 
 library(mice)

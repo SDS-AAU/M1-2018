@@ -3,36 +3,318 @@ title: 'M1-9: Supervised Machine Learning 2: Model boosting, diagnostics, explan
 author: "Daniel S. Hain (dsh@business.aau.dk)"
 date: "14/09/2018"
 output:
+  html_document:
+    df_print: paged
+    toc: yes
   html_notebook:
     df_print: paged
     number_sections: no
     toc: yes
-  html_document:
-    df_print: paged
-    toc: yes
 ---
+
+```{r setup, include=FALSE}
+### Generic preamble
+Sys.setenv(LANG = "en")
+
+### Clean Workspace (I like to start clean)
+rm(list=ls()); graphics.off() # get rid of everything in the workspace
+detachAllPackages <- function() { # Also, detach packages to avoid functions masked by others
+  basic.packages <- c("package:stats","package:graphics","package:grDevices","package:utils","package:datasets","package:methods","package:base")
+  package.list <- search()[ifelse(unlist(gregexpr("package:",search()))==1,TRUE,FALSE)]
+  package.list <- setdiff(package.list,basic.packages)
+  if (length(package.list)>0)  for (package in package.list) detach(package, character.only=TRUE)
+}
+detachAllPackages(); rm(detachAllPackages)
+
+### Load packages  Standard
+library(extrafont)
+library(knitr) # For display of the markdown
+library(tidyverse) # Collection of all the good stuff like dplyr, ggplot2 ect.
+library(magrittr)
+library(data.table) # Good format to work with large datasets
+library(skimr) # Nice descriptives
+library(knitr)
+
+
+### pimp up memory (to save on disk if necessary, only works on windows)
+#memory.limit(10 * 10^10)
+
+### Knitr options
+opts_chunk$set(warning = FALSE,
+               message = FALSE,
+               echo    = FALSE,
+               fig.align  = "center"
+               )
+```
+
+Some housekeeping (again), installing necessary packages.
+
+```{r}
+list.of.packages <- c("knitr", 
+                      "data.table",
+                      "caret",
+                      "caretEnsemble",
+                      "recipes"
+                      )
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
+rm(list.of.packages, new.packages)
+```
+
+
+# Preample: Load all ourstuff from last time
+
+We will go on working a bit with our previous dataset, so let's just run the last routie again:
+
+```{r}
+# Read data
+data <- readRDS("data/telco_churn.rds")
+
+# Mini manual preprocessing
+data %<>%
+  select(-customerID) %>%
+  drop_na() %>%
+  select(Churn, everything())
+
+# Split in training and test
+library(caret)
+index <- createDataPartition(y = data$Churn, p = 0.75, list = FALSE)
+training <- data[index,] 
+test <- data[-index,] 
+
+
+# Do the preprocessing recipe
+library(recipes)
+reci <- recipe(Churn ~ ., data = training) %>%
+  step_discretize(tenure, options = list(cuts = 6)) %>%
+  step_log(TotalCharges) %>%
+  step_dummy(all_nominal(), -all_outcomes()) %>%
+  step_center(all_predictors(), -all_outcomes()) %>%
+  step_scale(all_predictors(), -all_outcomes()) %>%
+  prep(data = training)
+
+# Split in x/y & train/test
+x_train <- bake(reci, newdata = training) %>% select(-Churn)
+x_test  <- bake(reci, newdata = test) %>% select(-Churn)
+y_train <- pull(training, Churn) %>% as.factor()
+y_test  <- pull(test, Churn) %>% as.factor()
+
+
+# Remove what we dont need anymore
+rm(data, index, reci)
+
+```
+
+We will also define the `caret` `traincontrol` parameters:
+
+```{r}
+ctrl <- trainControl(method = "cv", number = 10, 
+                     classProbs = TRUE,  summaryFunction = twoClassSummary,
+                     returnData = FALSE, returnResamp = "final", savePredictions = "final", verboseIter = FALSE)
+metric <- "ROC" # Which metric should be optimized (more on that later)
+```
+
 
 # Introduction
 
+# Some ML tricks 
 
-# Some ML tricks (bagging, boosting, bootstrapping)
+## Bagging, boosting, bootstrapping
+There are several useful ways to improve classifier performance. Interestingly enough, some of these methods work by adding randomness to the data. This seems paradoxical at first, but adding randomness turns out to be a helpful way of dealing with the overfitting problem. 
+
+* **Bootstraping** involves choosing (with replacement) a sample of size `n` from a dataset of size `n` to estimate the sampling distribution of some statistic. A variation is "`m` out of `n` bootstrap" which draws a sample of size `m` from a dataset of size `n`> `m`. THta's what we usually use for cross-validation. It is therefore mainly a technique for hyperparameter tuning.
+
+* **Bagging** stands for bootstrap aggregating. Bagging involves averaging across models estimated with several different bootstrap samples in order to improve the performance of an estimator. Here, each tree is build independently to the others. Bagging is primarily useful for nonlinear models such as trees. It is mainly a technique fordecreasing the out-of-sample error.
+
+* **Boosting** involves repeated estimation where misclassified observations are given increasing weight in each repetition. The final estimate is then a vote or an average across the repeated estimates.  Boosting tends to improve predictive performance an estimator significandy and can be used for pretty much any kind of classifier or regression model, including logits, probits, trees, and so on. Became lately increasingly hyped.
+
+## Application
+
+### Random Forest
+Lets start with a random forest, which you know by now.
+
+```{r}
+library(ranger)
+fit.rf <- train(x = x_train,
+                y = y_train,
+                trControl = ctrl,  
+                metric = metric,
+                method = "ranger", 
+                importance = "impurity", 
+                tuneLength = 4,
+                num.trees = 25) 
+```
+
+```{r}
+fit.rf
+ggplot(fit.rf)
+```
+
+### Support Vector Machines (SVM)
+Briefly, SVM works by identifying the optimal decision boundary that separates data points from different groups (or classes), and then predicts the class of new observations based on this separation boundary. Depending on the situations, the different groups might be separable by a linear straight line or by a non-linear boundary line. Support vector machine methods can handle both linear and non-linear class boundaries. It can be used for both two-class and multi-class classification problems. In real life data, the separation boundary is generally nonlinear. Technically, the SVM algorithm perform a non-linear classification using what is called the kernel trick. The most commonly used kernel transformations are polynomial kernel and radial kernel. Note that, there is also an extension of the SVM for regression, called support vector regression.
+
+```{r,echo=FALSE}
+library(kernlab) 
+fit.svm <- train(x = x_train,
+                y = y_train,
+                trControl = ctrl,  
+                metric = metric,
+                method = "svmRadial",
+                verbose = FALSE,
+                tuneLength = 4)
+
+```
+
+```{r}
+fit.svm
+ggplot(fit.svm)
+```
 
 
+### Neural Networks (NN)
+A neural network (NN) model is very similar to a non-linear regression model, with the exception that the former can handle an incredibly large amount of model parameters. For this reason, neural network models are said to have the ability to approximate any continuous function. Neural network is very good at learning non-linear function and also multiple outputs can be learnt at the same time. However, the training time is relatively long and it is also susceptible to local minimum traps. This can be mitigated by doing multiple rounds and pick the best learned model. You will encounter them in M3 a lot!!! `R` has several packages for dealing with NNs, where I prefer `nnet`.
 
+```{r,echo=FALSE}
+library(nnet)
+fit.nnet <- train(x = x_train,
+                y = y_train,
+                trControl = ctrl,  
+                metric = metric,
+                method = "nnet",
+                verbose = FALSE,
+                tuneLength = 4) # runs superlong, I skip the tuning
 
-# Ensemble models
+```
 
+```{r}
+fit.nnet
+ggplot(fit.nnet)
+```
 
+Plotting the neural network structure:
 
+```{r,fig.height=10,fig.width=10}
+library(NeuralNetTools)
+plotnet(fit.nnet$finalModel, alpha=0.6)
+```
 
+Cool, isnt it?
+
+### Extreme Gradient Boosting (XGB)
+**Extreme Gradient Boosting** is among the hottest libraries in supervised ML these days. It supports various objective functions, including regression, classification, and ranking. It has gained much popularity and attention recently as it was the algorithm of choice for many winning teams of a number of machine learning competitions. I didn't try it yet, but this is a good chance to see how it fairs and illustrate a gradient boost algorythm. We will use the new `xgboost` package here.
+
+```{r}
+library(xgboost)
+fit.xgb <- train(x = x_train,
+                y = y_train,
+                trControl = ctrl,  
+                metric = metric,
+                method = "xgbTree",
+                tuneLength = 4) # runs superlong, I skip the tuning
+
+```
+
+```{r}
+fit.xgb
+#ggplot(fit.xgb) # Somehow throws errors in knitr
+```
 
 # Model explainability
+Machine learning (ML) models are often considered “black boxes” due to their complex inner-workings. More advanced ML models such as random forests, gradient boosting machines (GBM), artificial neural networks (ANN), among others are typically more accurate for predicting nonlinear, faint, or rare phenomena. Unfortunately, more accuracy often comes at the expense of interpretability, and interpretability is crucial for business adoption, model documentation, regulatory oversight, and human acceptance and trust. Luckily, several advancements have been made to aid in interpreting ML models.
+
+![](media/m9_interpret.png){width=750px}
+
+Moreover, it’s often important to understand the ML model that you’ve trained on a global scale, and also to zoom into local regions of your data or your predictions and derive local explanations. 
+
+* **Global interpretations** help us understand the inputs and their entire modeled relationship with the prediction target, but global interpretations can be highly approximate in some cases. 
+* **Local interpretation**s help us understand model predictions for a single row of data or a group of similar rows.
+
 
 ## Global explanation
+Finally, let's get a feeling what variables the models mostly draw from. There are numerous ways for such inspections, in which we will dewll deeper in later lectures. Here, I just want to present the most intuitive and common one, **Variable Importance**.
+
+Most (but not all) model classes offer some possibility to derive measures of variable importance. Note, this is currently not implemented for SVMs. Again, in most ML models and setups, these meastures are nice to give a rough intuition, but CANNOT be interpreted as constant marginal effects, left alone causal.
+
+```{r,fig.height=7.5,fig.width=12.5}
+library(vip)
+library(ggpubr)
+ggarrange(vip(fit.rf) + ggtitle("VarImp: Random Forest"),
+          vip(fit.nnet) + ggtitle("VarImp: Neural Network"),
+          vip(fit.xgb) + ggtitle("VarImp: XG Boost"),
+          ncol = 2, nrow = 2)
+
+```
+
+From investigating the relative variable importance, we gain a set of insights. First,  we see quite some difference in relative variable importance across models. That again also reminds us that features importance, albeit informative, cannot be interpreted as a causal effect.
 
 
 ## Local Explanation
 
+### Introducing [`lime`](https://github.com/thomasp85/lime)
 > *"There once was a package called lime, Whose models were simply sublime, It gave explanations for their variations, one observation at a time."*
+
 *lime-rick by Mara Averick*
+
+**Local Interpretable Model-agnostic Explanations** (LIME) is a visualization technique that helps explain individual predictions. As the name implies, it is model agnostic so it can be applied to any supervised regression or classification model. The original paper is mindblowing, if you find time, just read it!
+
+* Marco Tulio Ribeiro, Sameer Singh, and Carlos Guestrin. 2016. “Why Should I Trust You?”: Explaining the Predictions of Any Classifier. In Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining (KDD ’16). ACM, New York, NY, USA, 1135-1144. DOI: https://doi.org/10.1145/2939672.2939778
+
+Behind the workings of LIME lies the assumption that every complex model is linear on a local scale and asserting that it is possible to fit a simple model around a single observation that will mimic how the global model behaves at that locality. The simple model can then be used to explain the predictions of the more complex model locally.
+
+The generalized algorithm LIME applies is:
+
+1. Given an observation, permute it to create replicated feature data with slight value modifications.
+2. Compute similarity distance measure between original observation and permuted observations.
+3. Apply selected machine learning model to predict outcomes of permuted data.
+3. Select m number of features to best describe predicted outcomes.
+4. Fit a simple model to the permuted data, explaining the complex model outcome with m features from the permuted data weighted by its similarity to the original observation .
+5. Use the resulting feature weights to explain local behavior.
+
+### Dermonstration
+To start with, an *in-build* illustration on image data (waif for M4!)
+
+```{r}
+library(lime)
+explanation <- .load_image_example()
+plot_image_explanation(explanation)
+```
+
+
+Ok, now we create or `lime()` object.
+
+```{r}
+limel.rf<- lime(x_train, fit.rf)
+```
+
+Once we created our lime objects, we can now perform the generalized LIME algorithm using the `explain()` function.
+
+```{r}
+explained.rf <-  explain(x = x_test %>% sample_n(8), 
+                         explainer = limel.rf, 
+                         n_permutations = 5000,
+                         dist_fun = "gower",
+                         kernel_width = 0.75,
+                         n_features = 10, 
+                         feature_select = "highest_weights",
+                         n_labels = 1 # to have the predicted class as baseline
+                         # labels = "Yes" # to have te positive class as baseline
+                         )
+```
+
+The `explain` function above first creates permutations, then calculates similarities, followed by selecting the m features. Lastly, explain will then fit a model. `lime` applies a ridge regression model (a subgroup of elastic nets) with the weighted permuted observations as the simple model.If the model is a regressor, the simple model will predict the output of the complex model directly. If the complex model is a classifier, the simple model will predict the probability of the chosen class(es).
+
+The `explain` output is a data frame containing different information on the simple model predictions. Most importantly, for each observation  it contains the simple model fit  and the weighted importance (feature_weight) for each important feature that best describes the local relationship.
+
+```{r}
+explained.rf
+```
+
+However the simplest approach to interpret the results is to visualize them. There are several plotting functions provided by lime but for tabular data we are only concerned with two. The most important of which is `plot_features()`. This will create a visualization containing an individual plot for each observation (case 1, 2, …, n) in our local_obs data frame. 
+                       
+```{r,fig.height=15,fig.width=15}
+plot_features(explained.rf)
+```
+
+Isn't that super-cool???
+
 

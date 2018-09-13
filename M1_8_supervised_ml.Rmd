@@ -371,10 +371,6 @@ We can also plot the results.
 ggplot(fit.glmnet)
 ```
 
-```{r}
-ggplot(varImp(fit.glmnet))
-```
-
 
 ### Model evaluation
 So, taking all together, lets see which model performs best out-of-sample:

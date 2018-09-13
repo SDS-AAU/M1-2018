@@ -3,12 +3,12 @@ title: 'M1-7: Unsupervised Machine Learning'
 author: "Daniel S. Hain (dsh@business.aau.dk)"
 date: "12/09/2018"
 output:
+  html_document:
+    df_print: paged
+    toc: yes
   html_notebook:
     df_print: paged
     number_sections: no
-    toc: yes
-  html_document:
-    df_print: paged
     toc: yes
 ---
 

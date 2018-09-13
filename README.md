@@ -29,6 +29,8 @@
 [M1-8 Notebook](https://rawgit.com/SDS-AAU/M1-2018/master/M1_8_supervised_ml.html)
 
 
-## M1 - 9 : Unsupervised ML
+## M1 - 9 : Supervised ML
 
 [M1-9 Notebook](https://rawgit.com/SDS-AAU/M1-2018/master/M1_9_supervised_ml_2.html)
+
+## M1 - 10 : A wine classification case study

@@ -34,3 +34,4 @@
 [M1-9 Notebook](https://rawgit.com/SDS-AAU/M1-2018/master/M1_9_supervised_ml_2.html)
 
 ## M1 - 10 : A wine classification case study
+[M1 - 10 Notebook](http://nbviewer.jupyter.org/github/SDS-AAU/M1-2018/blob/master/A_quick_python_modelling_pipeline.ipynb)

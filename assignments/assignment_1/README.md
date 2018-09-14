@@ -17,17 +17,17 @@ The starter code along with simplyfied datasets (no more TSV) can be found in th
 The safe way to download it is to take the zipfile (or use Github Desktop).
 If you download manually, make sure to rightclick on "row" when you open a dataset.
 
-Jupyter: Make sure to place the data (csv files) and the ipynb (notebook file) in the same folder on your machine
+**Jupyter****: Make sure to place the data (csv files) and the ipynb (notebook file) in the same folder on your machine
 
-Google Colab (jupyter cloud): Connect to an instance (green checkmark) --> click on the arrow on the left side --> "files" --> upload the CSVs
+**Google Colab** (jupyter cloud): Connect to an instance (green checkmark) --> click on the arrow on the left side --> "files" --> upload the CSVs
 
-RStudio: set your working directory using ```setwd("my_working_directory")```
+**RStudio**: set your working directory using ```setwd("my_working_directory")```
 
 
-Monday: I'm (Roman) around at the uni and you are always welcome to drop by. Really, I do learn a lot from dealing with your problems and any feedback is valuable. I have to check with the secretary Monday morning and perhaps we can have a short problem-solving-feedback round (depends on the room-booking-situation).
-
+**Monday**: I'm (Roman) around at the uni and you are always welcome to drop by. Really, I do learn a lot from dealing with your problems and any feedback is valuable. I have to check with the secretary Monday morning and perhaps we can have a short problem-solving-feedback round (depends on the room-booking-situation).
 
 ================
+
 Daniel S. Hain (<dsh@business.aau.dk>) & Roman Jurowetzki (<roman@business.aau.dk>)
 12/09/2018
 

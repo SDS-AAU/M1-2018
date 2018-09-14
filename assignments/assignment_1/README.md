@@ -1,5 +1,33 @@
 SDS Autumn 2018, M1, Assignment 1
 ================
+Update: 14/09/2018
+
+Due to various problems and basically easonable complains about the scope and complexity of the assignment:
+
+Following changes:
+
+- Deadline moved to Wednesday
+- The assignment will not be graded (however, you will need to deliver something that can pass to finish M1)
+- The scope is reduced to only look at the cities and trips-data. If you want to work with the people-data, go ahead but it's not necessary.
+- We prepared (pretty identical) starter code in R and Python, which outlines the basic structure, shows how to perform some of the transformations on selected variables, implements basic clustering etc.
+- Your job is to take the starter code and build your assignment on top of it by exploring more variables, identifying further patterns etc.
+
+The starter code along with simplyfied datasets (no more TSV) can be found in the zipfile assignment_v2.zip and the (unpacked) folder assignment_v2
+
+The safe way to download it is to take the zipfile (or use Github Desktop).
+If you download manually, make sure to rightclick on "row" when you open a dataset.
+
+Jupyter: Make sure to place the data (csv files) and the ipynb (notebook file) in the same folder on your machine
+
+Google Colab (jupyter cloud): Connect to an instance (green checkmark) --> click on the arrow on the left side --> "files" --> upload the CSVs
+
+RStudio: set your working directory using ```setwd("my_working_directory")```
+
+
+Monday: I'm (Roman) around at the uni and you are always welcome to drop by. Really, I do learn a lot from dealing with your problems and any feedback is valuable. I have to check with the secretary Monday morning and perhaps we can have a short problem-solving-feedback round (depends on the room-booking-situation).
+
+
+================
 Daniel S. Hain (<dsh@business.aau.dk>) & Roman Jurowetzki (<roman@business.aau.dk>)
 12/09/2018
 

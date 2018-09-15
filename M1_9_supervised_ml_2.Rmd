@@ -27,7 +27,6 @@ detachAllPackages <- function() { # Also, detach packages to avoid functions mas
 detachAllPackages(); rm(detachAllPackages)
 
 ### Load packages  Standard
-library(extrafont)
 library(knitr) # For display of the markdown
 library(tidyverse) # Collection of all the good stuff like dplyr, ggplot2 ect.
 library(magrittr)
@@ -42,7 +41,6 @@ library(knitr)
 ### Knitr options
 opts_chunk$set(warning = FALSE,
                message = FALSE,
-               echo    = FALSE,
                fig.align  = "center"
                )
 ```
@@ -54,7 +52,12 @@ list.of.packages <- c("knitr",
                       "data.table",
                       "caret",
                       "caretEnsemble",
-                      "recipes"
+                      "recipes",
+                      "ranger",
+                      "nnet",
+                      "NeuralNetTools",
+                      "xgboost",
+                      "kernlab"
                       )
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
@@ -130,7 +133,11 @@ There are several useful ways to improve classifier performance. Interestingly e
 
 ## Application
 
-### Random Forest
+In the following, I will demonstrate the application of some cool trending ML algorythms, which leverage some of the abovementioned techniques. You will see that they follow quite diverse methodologies and approaches (I explein the intuition briefly, but at this stage don't bother with the details). The idea is to dount you to the right packages in case you want to use them at one point later, and get a feeling for them. I also show that they are executed exactly with the same code as the 180+ other algorithms included in `caret`. So, don't be afraid of different algorithms :)
+
+**Note:** Last time, we always defined a `tuneGrid` for every algorithm, where we defined which hyperparameters `caret` should try and choose the setting with the optimal performance. This was for demonstration how to do that. Today, we will be lazy and lust give the `train()` function the `tuneLength = 4` argument, which tells `caret` to try 4 combinations of hyperparameters. It will use the ones internally defined as the on average most influencial ones. So in cade you are lazy too, or have no specific preferences for hyperparameters, let `caret` do the work for you.
+
+### Random Forest (Baseline)
 Lets start with a random forest, which you know by now.
 
 ```{r}
@@ -153,14 +160,13 @@ ggplot(fit.rf)
 ### Support Vector Machines (SVM)
 Briefly, SVM works by identifying the optimal decision boundary that separates data points from different groups (or classes), and then predicts the class of new observations based on this separation boundary. Depending on the situations, the different groups might be separable by a linear straight line or by a non-linear boundary line. Support vector machine methods can handle both linear and non-linear class boundaries. It can be used for both two-class and multi-class classification problems. In real life data, the separation boundary is generally nonlinear. Technically, the SVM algorithm perform a non-linear classification using what is called the kernel trick. The most commonly used kernel transformations are polynomial kernel and radial kernel. Note that, there is also an extension of the SVM for regression, called support vector regression.
 
-```{r,echo=FALSE}
+```{r, results="hide"}
 library(kernlab) 
 fit.svm <- train(x = x_train,
                 y = y_train,
                 trControl = ctrl,  
                 metric = metric,
                 method = "svmRadial",
-                verbose = FALSE,
                 tuneLength = 4)
 
 ```
@@ -174,7 +180,7 @@ ggplot(fit.svm)
 ### Neural Networks (NN)
 A neural network (NN) model is very similar to a non-linear regression model, with the exception that the former can handle an incredibly large amount of model parameters. For this reason, neural network models are said to have the ability to approximate any continuous function. Neural network is very good at learning non-linear function and also multiple outputs can be learnt at the same time. However, the training time is relatively long and it is also susceptible to local minimum traps. This can be mitigated by doing multiple rounds and pick the best learned model. You will encounter them in M3 a lot!!! `R` has several packages for dealing with NNs, where I prefer `nnet`.
 
-```{r,echo=FALSE}
+```{r, results="hide"}
 library(nnet)
 fit.nnet <- train(x = x_train,
                 y = y_train,
@@ -182,7 +188,8 @@ fit.nnet <- train(x = x_train,
                 metric = metric,
                 method = "nnet",
                 verbose = FALSE,
-                tuneLength = 4) # runs superlong, I skip the tuning
+                trace = FALSE, # to surpress the thousand messages in the output
+                tuneLength = 4) 
 
 ```
 
@@ -198,33 +205,36 @@ library(NeuralNetTools)
 plotnet(fit.nnet$finalModel, alpha=0.6)
 ```
 
-Cool, isnt it?
+Cool, isnt it? 
 
 ### Extreme Gradient Boosting (XGB)
 **Extreme Gradient Boosting** is among the hottest libraries in supervised ML these days. It supports various objective functions, including regression, classification, and ranking. It has gained much popularity and attention recently as it was the algorithm of choice for many winning teams of a number of machine learning competitions. I didn't try it yet, but this is a good chance to see how it fairs and illustrate a gradient boost algorythm. We will use the new `xgboost` package here.
 
-```{r}
+```{r, results="hide",warning=FALSE,message=FALSE}
 library(xgboost)
+invisible( # Workaround. I wrapp it in invisible() to surpress the thousand traning status messages 
 fit.xgb <- train(x = x_train,
                 y = y_train,
                 trControl = ctrl,  
                 metric = metric,
                 method = "xgbTree",
-                tuneLength = 4) # runs superlong, I skip the tuning
-
+                verbose = FALSE,
+                trace = FALSE, # to surpress the thousand messages in the output
+                tuneLength = 2) # Here only 2 tunes, otherwise runs too long
+)
 ```
 
 ```{r}
 fit.xgb
-#ggplot(fit.xgb) # Somehow throws errors in knitr
+# ggplot(fit.xgb) # Somehow throws errors in knitr
 ```
 
 # Model explainability
-Machine learning (ML) models are often considered “black boxes” due to their complex inner-workings. More advanced ML models such as random forests, gradient boosting machines (GBM), artificial neural networks (ANN), among others are typically more accurate for predicting nonlinear, faint, or rare phenomena. Unfortunately, more accuracy often comes at the expense of interpretability, and interpretability is crucial for business adoption, model documentation, regulatory oversight, and human acceptance and trust. Luckily, several advancements have been made to aid in interpreting ML models.
+Machine learning (ML) models are often considered black boxes due to their complex inner-workings. More advanced ML models such as random forests, gradient boosting machines (GBM), artificial neural networks (ANN), among others are typically more accurate for predicting nonlinear, faint, or rare phenomena. Unfortunately, more accuracy often comes at the expense of interpretability, and interpretability is crucial for business adoption, model documentation, regulatory oversight, and human acceptance and trust. Luckily, several advancements have been made to aid in interpreting ML models.
 
 ![](media/m9_interpret.png){width=750px}
 
-Moreover, it’s often important to understand the ML model that you’ve trained on a global scale, and also to zoom into local regions of your data or your predictions and derive local explanations. 
+Moreover, it's often important to understand the ML model that you've trained on a global scale, and also to zoom into local regions of your data or your predictions and derive local explanations. 
 
 * **Global interpretations** help us understand the inputs and their entire modeled relationship with the prediction target, but global interpretations can be highly approximate in some cases. 
 * **Local interpretation**s help us understand model predictions for a single row of data or a group of similar rows.
@@ -247,6 +257,8 @@ ggarrange(vip(fit.rf) + ggtitle("VarImp: Random Forest"),
 
 From investigating the relative variable importance, we gain a set of insights. First,  we see quite some difference in relative variable importance across models. That again also reminds us that features importance, albeit informative, cannot be interpreted as a causal effect.
 
+Note, for `xgboost`, there is a new `xgboostExplainer` package, which appartently does very well in global explanation. However, not tested yet.
+
 
 ## Local Explanation
 
@@ -257,7 +269,7 @@ From investigating the relative variable importance, we gain a set of insights. 
 
 **Local Interpretable Model-agnostic Explanations** (LIME) is a visualization technique that helps explain individual predictions. As the name implies, it is model agnostic so it can be applied to any supervised regression or classification model. The original paper is mindblowing, if you find time, just read it!
 
-* Marco Tulio Ribeiro, Sameer Singh, and Carlos Guestrin. 2016. “Why Should I Trust You?”: Explaining the Predictions of Any Classifier. In Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining (KDD ’16). ACM, New York, NY, USA, 1135-1144. DOI: https://doi.org/10.1145/2939672.2939778
+* Marco Tulio Ribeiro, Sameer Singh, and Carlos Guestrin. 2016. ""hy Should I Trust You?: Explaining the Predictions of Any Classifier." In Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining (KDD 2016). ACM, New York, NY, USA, 1135-1144. DOI: https://doi.org/10.1145/2939672.2939778
 
 Behind the workings of LIME lies the assumption that every complex model is linear on a local scale and asserting that it is possible to fit a simple model around a single observation that will mimic how the global model behaves at that locality. The simple model can then be used to explain the predictions of the more complex model locally.
 
@@ -280,13 +292,13 @@ plot_image_explanation(explanation)
 ```
 
 
-Ok, now we create or `lime()` object.
+Ok, now we create or `lime()` object just by giving the function our (in this case random forest) fitted `caret` model, and the original data.
 
 ```{r}
 limel.rf<- lime(x_train, fit.rf)
 ```
 
-Once we created our lime objects, we can now perform the generalized LIME algorithm using the `explain()` function.
+Once we created our lime objects, we can now perform the generalized LIME algorithm using the `explain()` function. 
 
 ```{r}
 explained.rf <-  explain(x = x_test %>% sample_n(8), 
@@ -309,7 +321,7 @@ The `explain` output is a data frame containing different information on the sim
 explained.rf
 ```
 
-However the simplest approach to interpret the results is to visualize them. There are several plotting functions provided by lime but for tabular data we are only concerned with two. The most important of which is `plot_features()`. This will create a visualization containing an individual plot for each observation (case 1, 2, …, n) in our local_obs data frame. 
+However the simplest approach to interpret the results is to visualize them. There are several plotting functions provided by lime but for tabular data we are only concerned with two. The most important of which is `plot_features()`. This will create a visualization containing an individual plot for each observation (case 1, 2, ..., n) in our data frame. 
                        
 ```{r,fig.height=15,fig.width=15}
 plot_features(explained.rf)

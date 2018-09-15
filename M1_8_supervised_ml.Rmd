@@ -29,7 +29,6 @@ detachAllPackages <- function() { # Also, detach packages to avoid functions mas
 detachAllPackages(); rm(detachAllPackages)
 
 ### Load packages  Standard
-library(extrafont)
 library(knitr) # For display of the markdown
 library(tidyverse) # Collection of all the good stuff like dplyr, ggplot2 ect.
 library(magrittr)
@@ -44,7 +43,7 @@ library(knitr)
 ### Knitr options
 opts_chunk$set(warning = FALSE,
                message = FALSE,
-               echo    = FALSE,
+               echo    = TRUE,
                fig.align  = "center"
                )
 ```
@@ -234,7 +233,7 @@ sqrt(mean(error ^ 2))
 
 We can also visualize the error term:
 
-```{r,fig.align='center'}
+```{r}
 # Some visualizatiom
 error %>% as_data_frame() %>%
   ggplot(aes(value)) + 
@@ -249,7 +248,7 @@ However, how well does our OLS model predict out-of-sample? To do so, we have to
 
 First, we will now split our data in a train and test sample. We could create an index for subsetting manually. However, caret provides the nice `createDataPartition()` function, which does that for you. Nice feature is that it takes care that the outcomes (y) are proportionally distrubuted in the subset. That is particularly important in case the outcomes are very unbalanced.
 
-```{r,echo=FALSE,warning=FALSE}
+```{r}
 library(caret)
 index <- createDataPartition(y = data$medv, p = 0.75, list = FALSE) # 75% to 25% split
 
@@ -261,7 +260,7 @@ test <- data[-index,]
 Before tuning the models, there is still some final preprocessing to do. For typical preprocessing tasks for ML, I like to use the `reciepes` package. It lets you conveniently define a recipe of standard ML preprocessing tasks. Afterwards, we can just can use this recipe to "bake" our data, meaning performing all the steps in the recipe. Here, we do only some simple transformations. We normalizizing all numeric data by centering (subtracting the mean) and scaling (divide by standard deviation). Finally, we remove features with zero-variance (we dont have any here, but its a good practice to do that with unknown data).
 
 
-```{r,echo=FALSE,warning=FALSE}
+```{r}
 
 library(recipes)
 reci <- recipe(medv ~ ., data = training) %>%
@@ -417,7 +416,7 @@ It is the 2x2 matrix with the foillowing cells:
 
 Just remember, We describe predicted values as **Positive** and **Negative** and actual values as **True** and **False**. Out of combinations of these values, we dan derive a set of different quality measures.
 
-![](media/m8_cf1.jpg){width=750px}
+![](media/m8_metrics2.png){width=750px}
 
 **Accuracy** (ACC)
 $$ {ACC} ={\frac {\mathrm {TP} +\mathrm {TN} }{P+N}}={\frac {\mathrm {TP} +\mathrm {TN} }{\mathrm {TP} +\mathrm {TN} +\mathrm {FP} +\mathrm {FN} }} $$
@@ -430,21 +429,6 @@ $$ {TNR} ={\frac {\mathrm {TN} }{N}}={\frac {\mathrm {TN} }{\mathrm {TN} +\mathr
 
 **Precision**, also called positive predictive value (PPV)
 $$ {PPV} ={\frac {\mathrm {TP} }{\mathrm {TP} +\mathrm {FP} }} $$ 
-
-**Negative predictive value** (NPV)
-$$ {NPV} ={\frac {\mathrm {TN} }{\mathrm {TN} +\mathrm {FN} }} $$
-
-**Miss rate** or false negative rate (FNR)
-$$ {FNR} ={\frac {\mathrm {FN} }{P}}={\frac {\mathrm {FN} }{\mathrm {FN} +\mathrm {TP} }}=1-\mathrm {TPR} $$
-
-**Fall-out** or false positive rate (FPR)
-$$ {FPR} ={\frac {\mathrm {FP} }{N}}={\frac {\mathrm {FP} }{\mathrm {FP} +\mathrm {TN} }}=1-\mathrm {TNR} $$ 
-
-**False discovery rate** (FDR)
-$$ {FDR} ={\frac {\mathrm {FP} }{\mathrm {FP} +\mathrm {TP} }}=1-\mathrm {PPV} $$
-
-**False omission rate** (FOR)
-$$ {FOR} ={\frac {\mathrm {FN} }{\mathrm {FN} +\mathrm {TN} }}=1-\mathrm {NPV} $$
 
 **F1 score**: is the harmonic mean of precision and sensitivity, meaning a weighted average of the true positive rate (recall) and precision.
 $$ F_{1}=2\cdot {\frac {\mathrm {PPV} \cdot \mathrm {TPR} }{\mathrm {PPV} +\mathrm {TPR} }}={\frac {2\mathrm {TP} }{2\mathrm {TP} +\mathrm {FP} +\mathrm {FN} }} $$

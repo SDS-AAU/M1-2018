@@ -1,7 +1,5 @@
 # Predicting Regions and the Nomad Score 
 
-### STARTER CODE in R comming up very soon ###
-
 In the first assignment you were working with the city and trips data from Nomadlist, exploring city-characteristics, latent grouping and popularity of resulting clusters over time.
 
 In this assignment you are going to work again with the city data, however now you will be exploring supervised learning to predict the Region (aka. continent given city-characteristics) and the Nomad Score.

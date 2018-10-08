@@ -6,7 +6,11 @@
 
 ## M1 - 2 : Data Munging
 
-[M1-2 Notebook](https://rawgit.com/SDS-AAU/M1-2018/master/M1_2_data_munging.html)
+[M1-2 Notebook (.rmd: Practical)](https://rawgit.com/SDS-AAU/M1-2018/master/M1_2_data_munging.rmd)
+
+[M1-2 Notebook (read-only: pretty)](https://rawgit.com/SDS-AAU/M1-2018/master/M1_2_data_munging.html)
+
+[M1-2 Notebook (kaggle: executable)](https://www.kaggle.com/danielhain/sds-2018-m1-2-data-munging)
 
 ## M1 - 3/4
 

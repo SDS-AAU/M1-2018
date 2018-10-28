@@ -6,10 +6,8 @@ output:
   html_document:
     df_print: paged
     toc: yes
-  html_notebook:
-    df_print: paged
-    number_sections: no
-    toc: yes
+    toc_float: true
+    number_sections: yes
 ---
 
 ```{r setup, include=FALSE}
@@ -26,18 +24,15 @@ detachAllPackages <- function() { # Also, detach packages to avoid functions mas
 }
 detachAllPackages(); rm(detachAllPackages)
 
-### Load packages  Standard
+### Load packages  
 library(knitr) # For display of the markdown
-library(tidyverse) # Collection of all the good stuff like dplyr, ggplot2 ect.
-library(magrittr)
-library(data.table) # Good format to work with large datasets
-library(skimr) # Nice descriptives
-
-### pimp up memory (to save on disk if necessary, only works on windows)
-#memory.limit(10 * 10^10)
 
 ### Knitr options
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+### Knitr options
+opts_chunk$set(warning=FALSE,
+               message=FALSE,
+               fig.align="center"
+               )
 ```
 
 Some housekeeping: In case you don't have the necessary packages installed, run this script to do so.
@@ -47,8 +42,20 @@ Some housekeeping: In case you don't have the necessary packages installed, run 
 list.of.packages <- c("devtools", "rstudioapi", "knitr", "tidyverse", "data.table", "skimr",  "factoextra", "FactoMineR", "GGally", "VIM", "mice", "reshape2")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
-rm(list.of.packages)
+rm(list.of.packages, new.packages)
 ```
+
+Load standard packages
+
+```{r}
+### Load packages  Standard
+library(tidyverse) # Collection of all the good stuff like dplyr, ggplot2 ect.
+library(magrittr) # For adittional piping operators
+library(data.table) # Good format to work with large datasets
+library(skimr) # Nice descriptives
+```
+
+An executable version on kaggle can be found [HERE](https://www.kaggle.com/danielhain/sds-2018-m1-7-unsupervised-ml)
 
 
 # Machine Learning: Some clarifications
@@ -169,10 +176,9 @@ data %<>%
 
 Lets take a look:
 
-```{r, results="asis"}
+```{r}
 head(data)
 glimpse(data)
-skim(data)
 ```
 
 Quite a set of interesting features, which are all numerically coded. Lets select the one we want to analyze and organize them a bit. Since it's a lot of variables, I afterwards select only a subset on which we do some graphical exploration.
@@ -206,7 +212,7 @@ ggcorr(data[vars], label = TRUE, label_size = 3, label_round = 2, label_alpha = 
 
 Even cooler, the `ggpairs` function creates you a scatterplot matrix plus all variable distributions and correlations. Before I used the package `PerformanceAnalytics` for that, but I like the ggplot-style more.
 
-```{rfig.width=10,fig.height=10,fig.align='center'}
+```{r,fig.width=10,fig.height=10,fig.align='center'}
 ggpairs(data[,vars.desc], 
         aes(alpha = 0.3), 
         ggtheme = theme_gray())  
@@ -221,7 +227,7 @@ library(VIM)
 ```
 
 
-```{rfig.width=10,fig.height=10,fig.align='center'}
+```{r,fig.width=10,fig.height=10,fig.align='center'}
 marginmatrix(data[,vars.desc]) # Note: Cool feature, but matrix becones just too big for many features
 
 aggr(data[,vars], 
@@ -241,7 +247,7 @@ For the real imputation, I prefer the `mice` package, which works with a neural 
 set.seed(1337)
 
 library(mice)
-data.mice <- mice(data = data[,vars], m = 1, maxit = 100, seed = 1337) 
+data.mice <- mice(data = data[,vars], m = 1, maxit = 50, seed = 1337) 
 
 ```
 
@@ -619,7 +625,7 @@ Lastly, a clusters quality is to a large extend determined by its usefulness.
 * External Validity
 
 # Your turn!
-So, why not have some fun on your own now? try to use what you learned up to now in the following extercise. [---> HERE <---](https://github.com/SDS-AAU/M1-2018/blob/master/data/vsm13.csv) you will find a dataset on Gert Hofstede's ["6-D model of national culture""](https://geerthofstede.com/culture-geert-hofstede-gert-jan-hofstede/6d-model-of-national-culture/). This popular measures of country-level culture in (by now) 6 dimensions became very popular in sociology, economics, and management science to explain cross-cultural interaction as well as frictions. a exhaustive documentation of the 2013 dataset can be found [here](https://geerthofstede.com/wp-content/uploads/2016/07/Manual-VSM-2013.pdf). It contains the following variables.
+So, why not have some fun on your own now? try to use what you learned up to now in the following extercise. [---> HERE <---](https://www.kaggle.com/danielhain/sds-2018-m1-7-unsupervised-ml-exercise-1) you will find a kaggle notebook with a fun exercise. If you prefer to run it locally, use the data [---> HERE <---](https://github.com/SDS-AAU/M1-2018/blob/master/data/vsm13.csv) instead, where you will find a dataset on Gert Hofstede's ["6-D model of national culture""](https://geerthofstede.com/culture-geert-hofstede-gert-jan-hofstede/6d-model-of-national-culture/). This popular measures of country-level culture in (by now) 6 dimensions became very popular in sociology, economics, and management science to explain cross-cultural interaction as well as frictions. a exhaustive documentation of the 2013 dataset can be found [here](https://geerthofstede.com/wp-content/uploads/2016/07/Manual-VSM-2013.pdf). It contains the following variables.
 
 * **`pdi:`**  The power distance index is defined as "the extent to which the less powerful members of organizations and institutions (like the family) accept and expect that power is distributed unequally."In this dimension, inequality and power is perceived from the followers, or the lower level. A higher degree of the Index indicates that hierarchy is clearly established and executed in society, without doubt or reason. A lower degree of the Index signifies that people question authority and attempt to distribute power.
 * **`idv:`**  This index explores the "degree to which people in a society are integrated into groups."" Individualistic societies have loose ties that often only relates an individual to his/her immediate family. They emphasize the "I" versus the "we". Its counterpart, collectivism, describes a society in which tightly-integrated relationships tie extended families and others into in-groups. These in-groups are laced with undoubted loyalty and support each other when a conflict arises with another in-group.

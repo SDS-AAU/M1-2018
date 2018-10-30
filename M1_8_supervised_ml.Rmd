@@ -5,13 +5,9 @@ date: "12/09/2018"
 output:
   html_document:
     df_print: paged
-    fig_caption: yes
     toc: yes
-  html_notebook:
-    df_print: paged
-    fig_caption: yes
-    number_sections: no
-    toc: yes
+    toc_float: true
+    number_sections: yes
 ---
 
 ```{r setup, include=FALSE}
@@ -30,12 +26,6 @@ detachAllPackages(); rm(detachAllPackages)
 
 ### Load packages  Standard
 library(knitr) # For display of the markdown
-library(tidyverse) # Collection of all the good stuff like dplyr, ggplot2 ect.
-library(magrittr)
-library(data.table) # Good format to work with large datasets
-library(skimr) # Nice descriptives
-library(knitr)
-
 
 ### pimp up memory (to save on disk if necessary, only works on windows)
 #memory.limit(10 * 10^10)
@@ -66,6 +56,16 @@ if(length(new.packages)) install.packages(new.packages)
 rm(list.of.packages)
 ```
 
+Load packages
+
+```{r}
+library(tidyverse) # Collection of all the good stuff like dplyr, ggplot2 ect.
+library(magrittr)
+library(data.table) # Good format to work with large datasets
+library(skimr) # Nice descriptives
+```
+
+Again, the whole exercise can be found executable on kaggle [HERE](https://www.kaggle.com/danielhain/sds-2018-m1-8-supervised-ml)
 
 # Introduction
 
@@ -857,6 +857,6 @@ rm(model_eval, model_eval2)
 ```
 
 # Your turn
-So, it's time to predict something: [---> HERE <---](https://github.com/SDS-AAU/M1-2018/blob/master/data/wine_quality.csv). More info's can be found  [---> HERE <---](https://www.kaggle.com/uciml/red-wine-quality-cortez-et-al-2009) (YEs, it's a kaggle set). Go and find a clever way to predict whine quality! :) 
+So, it's time to predict something: [---> HERE <---](https://www.kaggle.com/danielhain/sds-2018-m1-8-supervised-ml-exercise-1). More info's can be found  [---> HERE <---](https://www.kaggle.com/uciml/red-wine-quality-cortez-et-al-2009) (YEs, it's a kaggle set). Go and find a clever way to predict whine quality! :) 
 
 
